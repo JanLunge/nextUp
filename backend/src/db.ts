@@ -203,6 +203,15 @@ export const participantQueries = {
 
   withdraw: db.prepare(`
     UPDATE participants SET status = 'withdrawn', updated_at = CURRENT_TIMESTAMP WHERE id = ?
+  `) as Statement,
+
+  reactivate: db.prepare(`
+    UPDATE participants SET
+      name = ?, tagline = ?, profile_image_path = ?,
+      project_name = ?, project_url = ?, project_description = ?,
+      presentation_media_path = ?, media_type = ?, current_need = ?,
+      queue_position = ?, status = 'queued', updated_at = CURRENT_TIMESTAMP
+    WHERE id = ?
   `) as Statement
 };
 

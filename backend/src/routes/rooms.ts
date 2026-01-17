@@ -40,9 +40,16 @@ router.get('/:roomId', (req: Request<RoomParams>, res: Response) => {
       return res.status(404).json({ error: 'Room not found' });
     }
 
+    // Get participants sorted by queue_position, excluding withdrawn
     const participants = participantQueries.getQueuedByRoom.all(room.id) as ParticipantRow[];
-    const currentParticipant = participants.find((p: ParticipantRow) => p.queue_position === room.current_index);
-    const nextParticipant = participants.find((p: ParticipantRow) => p.queue_position === room.current_index + 1);
+
+    // Find current presenter (status = 'presenting')
+    const currentParticipant = participants.find((p: ParticipantRow) => p.status === 'presenting');
+
+    // Find next presenter (first 'queued' participant after current, or first if no current)
+    const queuedParticipants = participants.filter((p: ParticipantRow) => p.status === 'queued');
+    const nextParticipant = queuedParticipants[0] || null;
+
     const queueCount = participantQueries.getQueueCount.get(room.id)?.count ?? 0;
     const presentedCount = participantQueries.getPresentedCount.get(room.id)?.count ?? 0;
 
@@ -112,9 +119,16 @@ router.get('/:roomId/admin', (req: Request<RoomParams>, res: Response) => {
       return res.json({ valid: false });
     }
 
+    // Get participants sorted by queue_position, excluding withdrawn
     const participants = participantQueries.getQueuedByRoom.all(room.id) as ParticipantRow[];
-    const currentParticipant = participants.find((p: ParticipantRow) => p.queue_position === room.current_index);
-    const nextParticipant = participants.find((p: ParticipantRow) => p.queue_position === room.current_index + 1);
+
+    // Find current presenter (status = 'presenting')
+    const currentParticipant = participants.find((p: ParticipantRow) => p.status === 'presenting');
+
+    // Find next presenter (first 'queued' participant)
+    const queuedParticipants = participants.filter((p: ParticipantRow) => p.status === 'queued');
+    const nextParticipant = queuedParticipants[0] || null;
+
     const queueCount = participantQueries.getQueueCount.get(room.id)?.count ?? 0;
     const presentedCount = participantQueries.getPresentedCount.get(room.id)?.count ?? 0;
 
@@ -209,35 +223,30 @@ router.post('/:roomId/next', (req: Request<RoomParams>, res: Response) => {
       return res.status(403).json({ error: 'Invalid admin key' });
     }
 
-    const participants = (participantQueries.getByRoom.all(room.id) as ParticipantRow[]).filter((p: ParticipantRow) => p.status !== 'withdrawn');
+    const participants = participantQueries.getQueuedByRoom.all(room.id) as ParticipantRow[];
 
     // Mark current presenter as presented
-    const currentParticipant = participants.find((p: ParticipantRow) => p.queue_position === room.current_index);
+    const currentParticipant = participants.find((p: ParticipantRow) => p.status === 'presenting');
     if (currentParticipant) {
       participantQueries.updateStatus.run('presented', currentParticipant.id);
     }
 
-    // Find next valid presenter
-    let newIndex = room.current_index + 1;
-    let nextParticipant = participants.find((p: ParticipantRow) => p.queue_position === newIndex && p.status === 'queued');
-
-    const maxPosition = Math.max(...participants.map((p: ParticipantRow) => p.queue_position), 0);
-    while (!nextParticipant && newIndex <= maxPosition) {
-      newIndex++;
-      nextParticipant = participants.find((p: ParticipantRow) => p.queue_position === newIndex && p.status === 'queued');
-    }
+    // Find next queued presenter
+    const queuedParticipants = participants.filter((p: ParticipantRow) => p.status === 'queued');
+    const nextParticipant = queuedParticipants[0] || null;
 
     if (nextParticipant) {
       participantQueries.updateStatus.run('presenting', nextParticipant.id);
-      roomQueries.updateCurrentIndex.run(newIndex, room.id);
+      roomQueries.updateCurrentIndex.run(nextParticipant.queue_position, room.id);
     } else {
-      roomQueries.updateCurrentIndex.run(newIndex, room.id);
+      roomQueries.updateCurrentIndex.run(room.current_index + 1, room.id);
     }
 
-    const updatedRoom = roomQueries.getById.get(room.id);
+    // Re-fetch to get updated state
     const updatedParticipants = participantQueries.getQueuedByRoom.all(room.id) as ParticipantRow[];
-    const newCurrentParticipant = updatedParticipants.find((p: ParticipantRow) => p.queue_position === updatedRoom?.current_index);
-    const newNextParticipant = updatedParticipants.find((p: ParticipantRow) => p.queue_position === (updatedRoom?.current_index ?? 0) + 1 && p.status === 'queued');
+    const newCurrentParticipant = updatedParticipants.find((p: ParticipantRow) => p.status === 'presenting');
+    const newQueuedParticipants = updatedParticipants.filter((p: ParticipantRow) => p.status === 'queued');
+    const newNextParticipant = newQueuedParticipants[0] || null;
 
     // Broadcast via WebSocket
     const wsManager = req.app.get('wsManager');
@@ -258,6 +267,7 @@ router.post('/:roomId/next', (req: Request<RoomParams>, res: Response) => {
       }
     }
 
+    const updatedRoom = roomQueries.getById.get(room.id);
     res.json({
       current_index: updatedRoom?.current_index,
       current_participant: formatParticipant(newCurrentParticipant),
@@ -283,37 +293,38 @@ router.post('/:roomId/previous', (req: Request<RoomParams>, res: Response) => {
       return res.status(403).json({ error: 'Invalid admin key' });
     }
 
-    if (room.current_index <= 0) {
+    // Get all non-withdrawn participants
+    const allParticipants = (participantQueries.getByRoom.all(room.id) as ParticipantRow[]).filter((p: ParticipantRow) => p.status !== 'withdrawn');
+
+    // Find the current presenter
+    const currentParticipant = allParticipants.find((p: ParticipantRow) => p.status === 'presenting');
+
+    // Get presented participants sorted by queue_position descending (most recent first)
+    const presentedParticipants = allParticipants
+      .filter((p: ParticipantRow) => p.status === 'presented')
+      .sort((a, b) => b.queue_position - a.queue_position);
+
+    if (presentedParticipants.length === 0 && !currentParticipant) {
       return res.status(400).json({ error: 'Already at start' });
     }
 
-    const participants = (participantQueries.getByRoom.all(room.id) as ParticipantRow[]).filter((p: ParticipantRow) => p.status !== 'withdrawn');
-
     // Reset current presenter to queued
-    const currentParticipant = participants.find((p: ParticipantRow) => p.queue_position === room.current_index);
     if (currentParticipant) {
       participantQueries.updateStatus.run('queued', currentParticipant.id);
     }
 
-    // Find previous valid presenter
-    let newIndex = room.current_index - 1;
-    let prevParticipant = participants.find((p: ParticipantRow) => p.queue_position === newIndex);
-
-    while (!prevParticipant && newIndex > 0) {
-      newIndex--;
-      prevParticipant = participants.find((p: ParticipantRow) => p.queue_position === newIndex);
-    }
-
+    // Make the most recently presented person the current presenter
+    const prevParticipant = presentedParticipants[0];
     if (prevParticipant) {
       participantQueries.updateStatus.run('presenting', prevParticipant.id);
+      roomQueries.updateCurrentIndex.run(prevParticipant.queue_position, room.id);
     }
 
-    roomQueries.updateCurrentIndex.run(newIndex, room.id);
-
-    const updatedRoom = roomQueries.getById.get(room.id);
-    const updatedParticipants = (participantQueries.getByRoom.all(room.id) as ParticipantRow[]).filter((p: ParticipantRow) => p.status !== 'withdrawn');
-    const newCurrentParticipant = updatedParticipants.find((p: ParticipantRow) => p.queue_position === updatedRoom?.current_index);
-    const newNextParticipant = updatedParticipants.find((p: ParticipantRow) => p.queue_position === (updatedRoom?.current_index ?? 0) + 1);
+    // Re-fetch to get updated state
+    const updatedParticipants = participantQueries.getQueuedByRoom.all(room.id) as ParticipantRow[];
+    const newCurrentParticipant = updatedParticipants.find((p: ParticipantRow) => p.status === 'presenting');
+    const newQueuedParticipants = updatedParticipants.filter((p: ParticipantRow) => p.status === 'queued');
+    const newNextParticipant = newQueuedParticipants[0] || null;
 
     // Broadcast via WebSocket
     const wsManager = req.app.get('wsManager');
@@ -327,6 +338,7 @@ router.post('/:roomId/previous', (req: Request<RoomParams>, res: Response) => {
       });
     }
 
+    const updatedRoom = roomQueries.getById.get(room.id);
     res.json({
       current_index: updatedRoom?.current_index,
       current_participant: formatParticipant(newCurrentParticipant),

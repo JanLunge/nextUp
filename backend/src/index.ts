@@ -70,11 +70,14 @@ httpServer.listen(PORT, () => {
 });
 
 // Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down...');
+const shutdown = () => {
+  console.log('Shutting down...');
   wsManager.close();
   httpServer.close(() => {
     console.log('Server closed');
     process.exit(0);
   });
-});
+};
+
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);

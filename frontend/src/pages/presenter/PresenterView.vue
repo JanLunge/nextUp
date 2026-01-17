@@ -18,8 +18,8 @@ interface WaveEmitterExpose {
 
 const route = useRoute();
 const roomId = computed(() => route.params.roomId as string);
+const adminKey = computed(() => (route.query.key as string) || null);
 
-const adminKey = ref<string | null>((route.query.key as string) || null);
 const waveEmitter = ref<WaveEmitterExpose | null>(null);
 
 // Room state

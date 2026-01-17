@@ -23,7 +23,7 @@ const { passphrase } = usePassphrase();
 const waveEmitter = ref<WaveEmitterExpose | null>(null);
 
 // Room state
-const { room, currentParticipant, nextParticipant, queue, fetchRoom, updateFromWebSocket } = useRoom(roomId);
+const { room, currentParticipant, nextParticipant, queue, fetchRoom, fetchQueue, updateFromWebSocket } = useRoom(roomId);
 
 // UI state
 const showYouAreNext = ref(false);
@@ -99,6 +99,7 @@ function goToWaves(): void {
 
 onMounted(async () => {
   await fetchRoom();
+  await fetchQueue();
   await fetchProfile();
   connect();
 });

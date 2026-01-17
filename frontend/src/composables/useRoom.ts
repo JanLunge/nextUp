@@ -8,14 +8,17 @@ export interface UseRoomReturn {
   error: Ref<string | null>;
   currentParticipant: ComputedRef<Participant | null>;
   nextParticipant: ComputedRef<Participant | null>;
+  queue: Ref<Participant[]>;
   queueCount: ComputedRef<number>;
   presentedCount: ComputedRef<number>;
   fetchRoom: () => Promise<void>;
+  fetchQueue: () => Promise<void>;
   updateFromWebSocket: (message: WSMessage) => void;
 }
 
 export function useRoom(roomId: Ref<string> | ComputedRef<string> | string): UseRoomReturn {
   const room = ref<Room | null>(null);
+  const queue = ref<Participant[]>([]);
   const loading = ref(false);
   const error = ref<string | null>(null);
 
@@ -46,6 +49,24 @@ export function useRoom(roomId: Ref<string> | ComputedRef<string> | string): Use
     }
   }
 
+  async function fetchQueue(): Promise<void> {
+    const id = getRoomId();
+    if (!id) return;
+
+    try {
+      const result = await api.getParticipants(id);
+      // Filter to only queued participants (not current/next/presented)
+      const currentId = room.value?.current_participant?.id;
+      const nextId = room.value?.next_participant?.id;
+      queue.value = result.participants.filter(
+        (p) => p.status === 'queued' && p.id !== currentId && p.id !== nextId
+      );
+    } catch (e) {
+      console.error('Failed to fetch queue:', e);
+      queue.value = [];
+    }
+  }
+
   function updateFromWebSocket(message: WSMessage): void {
     if (!room.value) return;
 
@@ -64,12 +85,22 @@ export function useRoom(roomId: Ref<string> | ComputedRef<string> | string): Use
       case 'participant_joined': {
         const msg = message as WSParticipantJoinedMessage;
         room.value.queue_count = msg.queue_count;
+        // Add the new participant to the queue
+        if (msg.participant.status === 'queued') {
+          queue.value = [...queue.value, msg.participant];
+          // If there's no next participant, this becomes next
+          if (!room.value.next_participant) {
+            room.value.next_participant = msg.participant;
+          }
+        }
         break;
       }
 
       case 'participant_withdrawn': {
         const msg = message as WSParticipantWithdrawnMessage;
         room.value.queue_count = msg.queue_count;
+        // Remove from queue
+        queue.value = queue.value.filter((p) => p.id !== msg.participantId);
         break;
       }
 
@@ -92,9 +123,11 @@ export function useRoom(roomId: Ref<string> | ComputedRef<string> | string): Use
     error,
     currentParticipant,
     nextParticipant,
+    queue,
     queueCount,
     presentedCount,
     fetchRoom,
+    fetchQueue,
     updateFromWebSocket,
   };
 }

@@ -64,7 +64,7 @@ async function withdraw(): Promise<void> {
   if (!confirm('Are you sure you want to withdraw your submission?')) return;
 
   try {
-    await api.withdrawParticipant(roomId.value, submission.value.id, passphrase.value);
+    await api.withdrawSubmission(roomId.value, passphrase.value);
     router.push({ name: 'roomView', params: { roomId: roomId.value } });
   } catch (e) {
     error.value = e instanceof Error ? e.message : 'Failed to withdraw';

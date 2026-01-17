@@ -46,6 +46,8 @@ router.post('/:roomId/participants', (req: Request<RoomParams>, res: Response) =
     let profile;
     let isNewProfile = false;
 
+    let existingWithdrawn: ParticipantRow | null = null;
+
     // Check if using existing passphrase
     if (passphrase) {
       profile = profileQueries.getByPassphrase.get(passphrase);
@@ -55,8 +57,12 @@ router.post('/:roomId/participants', (req: Request<RoomParams>, res: Response) =
 
       // Check if already has submission in this room
       const existingSubmission = participantQueries.getByRoomAndProfile.get(room.id, profile.id);
-      if (existingSubmission && existingSubmission.status !== 'withdrawn') {
-        return res.status(400).json({ error: 'Already submitted to this room' });
+      if (existingSubmission) {
+        if (existingSubmission.status !== 'withdrawn') {
+          return res.status(400).json({ error: 'Already submitted to this room' });
+        }
+        // Track the withdrawn submission so we can reactivate it
+        existingWithdrawn = existingSubmission;
       }
     } else {
       // Create new profile
@@ -85,23 +91,42 @@ router.post('/:roomId/participants', (req: Request<RoomParams>, res: Response) =
     const nextPositionResult = participantQueries.getNextQueuePosition.get(room.id);
     const next_position = nextPositionResult?.next_position ?? 1;
 
-    // Create participant
-    participantQueries.create.run(
-      room.id,
-      profile.id,
-      sanitizeHtml(name.trim()),
-      sanitizeHtml(tagline?.trim()) || null,
-      profile_image_path || null,
-      sanitizeHtml(project_name.trim()),
-      project_url || null,
-      sanitizeHtml(project_description.trim()),
-      presentation_media_path || null,
-      media_type || null,
-      sanitizeHtml(current_need?.trim()) || null,
-      next_position
-    );
+    let participant;
 
-    const participant = participantQueries.getByRoomAndProfile.get(room.id, profile.id);
+    if (existingWithdrawn) {
+      // Reactivate withdrawn submission with new data
+      participantQueries.reactivate.run(
+        sanitizeHtml(name.trim()),
+        sanitizeHtml(tagline?.trim()) || null,
+        profile_image_path || null,
+        sanitizeHtml(project_name.trim()),
+        project_url || null,
+        sanitizeHtml(project_description.trim()),
+        presentation_media_path || null,
+        media_type || null,
+        sanitizeHtml(current_need?.trim()) || null,
+        next_position,
+        existingWithdrawn.id
+      );
+      participant = participantQueries.getById.get(existingWithdrawn.id);
+    } else {
+      // Create new participant
+      participantQueries.create.run(
+        room.id,
+        profile.id,
+        sanitizeHtml(name.trim()),
+        sanitizeHtml(tagline?.trim()) || null,
+        profile_image_path || null,
+        sanitizeHtml(project_name.trim()),
+        project_url || null,
+        sanitizeHtml(project_description.trim()),
+        presentation_media_path || null,
+        media_type || null,
+        sanitizeHtml(current_need?.trim()) || null,
+        next_position
+      );
+      participant = participantQueries.getByRoomAndProfile.get(room.id, profile.id);
+    }
 
     // Also update profile with latest data
     if (!isNewProfile) {

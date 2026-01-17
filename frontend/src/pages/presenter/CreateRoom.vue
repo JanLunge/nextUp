@@ -26,7 +26,11 @@ async function createRoom(): Promise<void> {
 
 function goToPresenter(): void {
   if (createdRoom.value) {
-    router.push({ name: 'presenter', params: { roomId: createdRoom.value.id } });
+    router.push({
+      name: 'presenter',
+      params: { roomId: createdRoom.value.id },
+      query: { key: createdRoom.value.admin_key }
+    });
   }
 }
 
