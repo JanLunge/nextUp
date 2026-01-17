@@ -45,7 +45,7 @@ async function fetchSubmission(): Promise<void> {
 
   try {
     const result = await api.getMySubmission(roomId.value, passphrase.value);
-    submission.value = result;
+    submission.value = result.participant;
   } catch (e) {
     if (e instanceof Error && e.message.includes('not found')) {
       router.push({ name: 'submit', params: { roomId: roomId.value } });
@@ -193,11 +193,23 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- Project Info -->
+        <!-- Submission Info -->
         <div class="card bg-surface-elevated border border-white/5 animate-fade-up delay-200">
           <div class="p-5 space-y-4">
-            <div>
-              <h2 class="font-display text-2xl font-bold text-coral">{{ submission.project_name }}</h2>
+            <!-- Name is always shown -->
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-full bg-coral/20 flex items-center justify-center text-xl font-bold text-coral">
+                {{ submission.name?.charAt(0)?.toUpperCase() || '?' }}
+              </div>
+              <div>
+                <h2 class="font-display text-xl font-bold text-cream">{{ submission.name }}</h2>
+                <p v-if="submission.tagline" class="text-sm text-subtle">{{ submission.tagline }}</p>
+              </div>
+            </div>
+
+            <!-- Project Name (if provided) -->
+            <div v-if="submission.project_name">
+              <h3 class="font-display text-lg font-bold text-coral">{{ submission.project_name }}</h3>
               <a
                 v-if="submission.project_url"
                 :href="submission.project_url"
@@ -209,7 +221,13 @@ onMounted(() => {
               </a>
             </div>
 
-            <p class="text-cream/80">{{ submission.project_description }}</p>
+            <!-- Project Description (if provided) -->
+            <p v-if="submission.project_description" class="text-cream/80">{{ submission.project_description }}</p>
+
+            <!-- Empty state if no project details -->
+            <div v-if="!submission.project_name && !submission.project_description" class="p-4 bg-surface-overlay/50 rounded-xl border border-white/5 border-dashed">
+              <p class="text-subtle text-sm text-center">No project details added yet</p>
+            </div>
 
             <!-- Current Need -->
             <div

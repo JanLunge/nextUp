@@ -71,13 +71,15 @@ export function useWebSocket(
       isConnected.value = true;
       error.value = null;
       // Send join message
-      send(JSON.stringify({
+      const joinMessage = {
         type: 'join',
         roomId: getRoomId(),
         role,
         passphrase,
         adminKey,
-      }));
+      };
+      console.log('[WS] Sending join message:', { ...joinMessage, passphrase: passphrase ? `${passphrase.substring(0, 10)}...` : null });
+      send(JSON.stringify(joinMessage));
     },
     onDisconnected() {
       isConnected.value = false;

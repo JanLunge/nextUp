@@ -104,6 +104,9 @@ export class WebSocketManager implements WebSocketManagerInterface {
     let profile = null;
     if (passphrase) {
       profile = profileQueries.getByPassphrase.get(passphrase);
+      console.log(`[WS] Join with passphrase: profile=${profile?.id}, passphrase=${passphrase?.substring(0, 10)}...`);
+    } else {
+      console.log(`[WS] Join without passphrase, role=${role}`);
     }
 
     // Store client info
@@ -207,13 +210,23 @@ export class WebSocketManager implements WebSocketManagerInterface {
   // Send to a specific participant by profile ID
   notifyParticipant(roomId: string, profileId: number, data: object): void {
     const roomClients = this.rooms.get(roomId);
-    if (!roomClients) return;
+    if (!roomClients) {
+      console.log(`[WS] notifyParticipant: No clients in room ${roomId}`);
+      return;
+    }
 
+    let found = false;
     roomClients.forEach(({ ws, profileId: clientProfileId }) => {
+      console.log(`[WS] Checking client profileId=${clientProfileId} against target=${profileId}`);
       if (clientProfileId === profileId) {
         this.send(ws, data);
+        found = true;
       }
     });
+
+    if (!found) {
+      console.log(`[WS] notifyParticipant: No client found with profileId=${profileId} in room ${roomId}`);
+    }
   }
 
   // Timer management

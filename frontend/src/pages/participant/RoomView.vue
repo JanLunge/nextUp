@@ -176,8 +176,30 @@ onMounted(async () => {
 
     <!-- Main Content -->
     <main class="px-4 py-6 space-y-6">
-      <!-- Current Presenter -->
-      <section v-if="currentParticipant" class="animate-fade-up">
+      <!-- Current Presenter - Special highlight if it's the current user -->
+      <section v-if="currentParticipant && isCurrentUser(currentParticipant)" class="animate-fade-up">
+        <div class="card bg-coral/20 border-2 border-coral overflow-hidden next-pulse">
+          <div class="p-5">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-12 h-12 rounded-full bg-coral/30 flex items-center justify-center">
+                <span class="text-3xl">🎤</span>
+              </div>
+              <div>
+                <h2 class="font-display text-xl font-bold text-coral">You're On Stage!</h2>
+                <p class="text-sm text-cream/80">You're currently presenting</p>
+              </div>
+            </div>
+            <div class="p-3 bg-surface/50 rounded-xl">
+              <p class="text-cream">
+                <span class="font-medium">Your project:</span> {{ currentParticipant.project_name || 'Untitled' }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Current Presenter - Regular view -->
+      <section v-else-if="currentParticipant" class="animate-fade-up">
         <div class="flex items-center gap-2 mb-3">
           <div class="w-2 h-2 rounded-full bg-coral animate-pulse"></div>
           <h2 class="font-display text-sm font-bold text-subtle uppercase tracking-wider">Now Presenting</h2>
@@ -185,7 +207,7 @@ onMounted(async () => {
         <CurrentPresenterCard
           :participant="currentParticipant"
           :has-waved="hasWavedAt(currentParticipant.id)"
-          :is-you="isCurrentUser(currentParticipant)"
+          :is-you="false"
           @wave="handleWave"
           @click="goToPresenter(currentParticipant)"
         />
@@ -220,13 +242,38 @@ onMounted(async () => {
         </div>
       </div>
 
-      <!-- Up Next -->
-      <section v-if="nextParticipant" class="animate-fade-up delay-150">
-        <h2 class="font-display text-sm font-bold text-subtle uppercase tracking-wider mb-3">Up Next</h2>
+      <!-- Up Next - Special highlight if it's the current user -->
+      <section v-if="nextParticipant && isCurrentUser(nextParticipant)" class="animate-fade-up delay-150">
+        <div class="card bg-coral/10 border-2 border-coral/50 overflow-hidden">
+          <div class="p-4">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-10 h-10 rounded-full bg-coral/20 flex items-center justify-center">
+                <span class="text-2xl">⚡</span>
+              </div>
+              <div>
+                <h2 class="font-display font-bold text-coral">You're Up Next!</h2>
+                <p class="text-sm text-subtle">You'll present after the current speaker finishes</p>
+              </div>
+            </div>
+            <div class="p-3 bg-surface/50 rounded-xl">
+              <p class="text-sm text-cream">
+                <span class="font-medium">Your project:</span> {{ nextParticipant.project_name || 'Untitled' }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Up Next - Regular view for other users -->
+      <section v-else-if="nextParticipant" class="animate-fade-up delay-150">
+        <div class="flex items-center gap-2 mb-3">
+          <h2 class="font-display text-sm font-bold text-subtle uppercase tracking-wider">Up Next</h2>
+          <span class="text-xs text-subtle">(after current presenter)</span>
+        </div>
         <ParticipantCard
           :participant="nextParticipant"
           :has-waved="hasWavedAt(nextParticipant.id)"
-          :is-you="isCurrentUser(nextParticipant)"
+          :is-you="false"
           @wave="handleWave"
           @click="goToPresenter(nextParticipant)"
         />

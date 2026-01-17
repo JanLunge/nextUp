@@ -261,6 +261,7 @@ router.post('/:roomId/next', (req: Request<RoomParams>, res: Response) => {
 
       // Notify next presenter they're up next
       if (newNextParticipant) {
+        console.log(`[ROOMS] Notifying next participant: profile_id=${newNextParticipant.profile_id}, name=${newNextParticipant.name}`);
         wsManager.notifyParticipant(room.id, newNextParticipant.profile_id, {
           type: 'you_are_next'
         });
