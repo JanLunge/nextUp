@@ -25,22 +25,43 @@ watch(() => props.show, (newVal) => {
 
 <template>
   <Teleport to="body">
-    <div
-      v-if="show"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+    <Transition
+      enter-active-class="transition-all duration-300"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition-all duration-200"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
     >
-      <div class="card bg-base-100 w-80 shadow-2xl next-pulse">
-        <div class="card-body items-center text-center">
-          <div class="text-6xl mb-4">⚡</div>
-          <h2 class="card-title text-2xl">YOU'RE UP NEXT!</h2>
-          <p class="text-base-content/70 mt-2">Get ready to present</p>
-          <div class="card-actions mt-6">
-            <button class="btn btn-primary btn-lg" @click="emit('close')">
-              Got it
+      <div
+        v-if="show"
+        class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm"
+      >
+        <div class="card bg-surface-elevated border border-coral/30 w-full max-w-sm next-pulse glow-coral animate-scale-in">
+          <div class="p-8 text-center">
+            <!-- Icon -->
+            <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-coral/20 flex items-center justify-center">
+              <span class="text-5xl">⚡</span>
+            </div>
+
+            <!-- Title -->
+            <h2 class="font-display text-3xl font-bold text-coral mb-2">
+              YOU'RE UP NEXT!
+            </h2>
+            <p class="text-subtle mb-8">
+              Get ready to take the stage
+            </p>
+
+            <!-- Button -->
+            <button
+              class="btn btn-primary btn-lg w-full font-display font-bold"
+              @click="emit('close')"
+            >
+              Got it!
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </Transition>
   </Teleport>
 </template>

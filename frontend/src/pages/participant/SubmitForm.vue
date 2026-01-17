@@ -125,152 +125,204 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-base-200">
+  <div class="min-h-screen bg-surface pb-safe">
     <!-- Header -->
-    <header class="bg-base-100 shadow-sm">
-      <div class="container mx-auto px-4 py-3">
+    <header class="glass-dark sticky top-0 z-10">
+      <div class="px-4 py-4">
         <div class="flex items-center gap-4">
-          <button class="btn btn-ghost btn-sm" @click="goBack">
-            ← Back
+          <button class="btn btn-ghost btn-sm btn-square" @click="goBack">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
           </button>
-          <h1 class="font-semibold">Submit to Present</h1>
+          <div>
+            <h1 class="font-display font-bold text-cream">Submit to Present</h1>
+            <p class="text-xs text-subtle">Share your project with the room</p>
+          </div>
         </div>
       </div>
     </header>
 
     <!-- Form -->
-    <main class="container mx-auto px-4 py-6">
-      <div class="card bg-base-100 shadow-lg max-w-lg mx-auto">
-        <div class="card-body">
-          <!-- Prefilled Notice -->
-          <div v-if="prefilled" class="alert alert-info mb-4">
-            <span>Pre-filled from your previous submission</span>
-            <button class="btn btn-sm btn-ghost" @click="clearForm">Clear and start fresh</button>
-          </div>
-
-          <!-- Profile Picture -->
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Profile Picture</span>
-            </label>
-            <MediaUpload
-              v-model="profileImagePath"
-              type="profile"
-              label="Upload Photo"
-            />
-          </div>
-
-          <!-- Your Name -->
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Your Name *</span>
-            </label>
-            <input
-              v-model="name"
-              type="text"
-              placeholder="Jane Doe"
-              class="input input-bordered"
-            />
-          </div>
-
-          <!-- Tagline -->
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Tagline</span>
-            </label>
-            <input
-              v-model="tagline"
-              type="text"
-              placeholder="UX Designer & Founder"
-              class="input input-bordered"
-            />
-          </div>
-
-          <!-- Project Name -->
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Project Name *</span>
-            </label>
-            <input
-              v-model="projectName"
-              type="text"
-              placeholder="SnapFlow"
-              class="input input-bordered"
-            />
-          </div>
-
-          <!-- Project URL -->
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Project URL</span>
-            </label>
-            <input
-              v-model="projectUrl"
-              type="url"
-              placeholder="https://snapflow.io"
-              class="input input-bordered"
-            />
-          </div>
-
-          <!-- Project Description -->
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Description *</span>
-            </label>
-            <textarea
-              v-model="projectDescription"
-              placeholder="An app for quick photo sharing with friends..."
-              class="textarea textarea-bordered h-24"
-            ></textarea>
-          </div>
-
-          <!-- Presentation Media -->
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Presentation Media (image or video)</span>
-            </label>
-            <MediaUpload
-              v-model="presentationMediaPath"
-              type="presentation"
-              label="Upload Image or Video"
-              @update:media-type="mediaType = $event"
-            />
-            <label class="label">
-              <span class="label-text-alt">Max 30s video, 10MB</span>
-            </label>
-          </div>
-
-          <!-- Current Need -->
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">What do you need? (Your ask)</span>
-            </label>
-            <textarea
-              v-model="currentNeed"
-              placeholder="Looking for beta testers for iOS app launch..."
-              class="textarea textarea-bordered h-20"
-            ></textarea>
-            <label class="label">
-              <span class="label-text-alt">Shown during final 1/3 of your presentation</span>
-            </label>
-          </div>
-
-          <!-- Error -->
-          <p v-if="error" class="text-error text-sm mt-2">{{ error }}</p>
-
-          <!-- Submit Button -->
-          <div class="card-actions mt-6">
-            <button
-              class="btn btn-primary w-full"
-              :disabled="loading || !name.trim() || !projectName.trim() || !projectDescription.trim()"
-              @click="submit"
-            >
-              <span v-if="loading" class="loading loading-spinner loading-sm"></span>
-              <span v-else>Submit to Queue</span>
-            </button>
+    <main class="px-4 py-6">
+      <div class="max-w-lg mx-auto space-y-6">
+        <!-- Prefilled Notice -->
+        <div v-if="prefilled" class="p-4 bg-info/10 border border-info/30 rounded-xl animate-fade-up">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <svg class="w-5 h-5 text-info" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span class="text-sm text-info">Pre-filled from your profile</span>
+            </div>
+            <button class="btn btn-ghost btn-xs text-info" @click="clearForm">Clear</button>
           </div>
         </div>
+
+        <!-- Section: About You -->
+        <section class="card bg-surface-elevated border border-white/5 animate-fade-up">
+          <div class="p-5">
+            <h2 class="font-display font-bold text-cream mb-4 flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-coral/20 flex items-center justify-center text-coral text-xs font-bold">1</span>
+              About You
+            </h2>
+
+            <div class="space-y-4">
+              <!-- Profile Picture -->
+              <div>
+                <label class="block text-sm font-medium text-subtle uppercase tracking-wider mb-2">
+                  Profile Picture
+                </label>
+                <MediaUpload
+                  v-model="profileImagePath"
+                  type="profile"
+                  label="Upload Photo"
+                />
+              </div>
+
+              <!-- Name -->
+              <div>
+                <label class="block text-sm font-medium text-subtle uppercase tracking-wider mb-2">
+                  Your Name <span class="text-coral">*</span>
+                </label>
+                <input
+                  v-model="name"
+                  type="text"
+                  placeholder="Jane Doe"
+                  class="input input-bordered w-full bg-surface-overlay border-white/10"
+                />
+              </div>
+
+              <!-- Tagline -->
+              <div>
+                <label class="block text-sm font-medium text-subtle uppercase tracking-wider mb-2">
+                  Tagline
+                </label>
+                <input
+                  v-model="tagline"
+                  type="text"
+                  placeholder="UX Designer & Founder"
+                  class="input input-bordered w-full bg-surface-overlay border-white/10"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section: Your Project -->
+        <section class="card bg-surface-elevated border border-white/5 animate-fade-up delay-150">
+          <div class="p-5">
+            <h2 class="font-display font-bold text-cream mb-4 flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-coral/20 flex items-center justify-center text-coral text-xs font-bold">2</span>
+              Your Project
+            </h2>
+
+            <div class="space-y-4">
+              <!-- Project Name -->
+              <div>
+                <label class="block text-sm font-medium text-subtle uppercase tracking-wider mb-2">
+                  Project Name <span class="text-coral">*</span>
+                </label>
+                <input
+                  v-model="projectName"
+                  type="text"
+                  placeholder="SnapFlow"
+                  class="input input-bordered w-full bg-surface-overlay border-white/10"
+                />
+              </div>
+
+              <!-- Project URL -->
+              <div>
+                <label class="block text-sm font-medium text-subtle uppercase tracking-wider mb-2">
+                  Project URL
+                </label>
+                <input
+                  v-model="projectUrl"
+                  type="url"
+                  placeholder="https://snapflow.io"
+                  class="input input-bordered w-full bg-surface-overlay border-white/10"
+                />
+              </div>
+
+              <!-- Description -->
+              <div>
+                <label class="block text-sm font-medium text-subtle uppercase tracking-wider mb-2">
+                  Description <span class="text-coral">*</span>
+                </label>
+                <textarea
+                  v-model="projectDescription"
+                  placeholder="An app for quick photo sharing with friends..."
+                  class="textarea textarea-bordered w-full h-24 bg-surface-overlay border-white/10"
+                ></textarea>
+              </div>
+
+              <!-- Presentation Media -->
+              <div>
+                <label class="block text-sm font-medium text-subtle uppercase tracking-wider mb-2">
+                  Presentation Media
+                </label>
+                <MediaUpload
+                  v-model="presentationMediaPath"
+                  type="presentation"
+                  label="Upload Image or Video"
+                  @update:media-type="mediaType = $event"
+                />
+                <p class="text-xs text-subtle mt-2">Max 30s video, 10MB. This will be shown on the main display.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section: Your Ask -->
+        <section class="card bg-surface-elevated border border-white/5 animate-fade-up delay-200">
+          <div class="p-5">
+            <h2 class="font-display font-bold text-cream mb-4 flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-coral/20 flex items-center justify-center text-coral text-xs font-bold">3</span>
+              Your Ask
+            </h2>
+
+            <div>
+              <label class="block text-sm font-medium text-subtle uppercase tracking-wider mb-2">
+                What do you need?
+              </label>
+              <textarea
+                v-model="currentNeed"
+                placeholder="Looking for beta testers for iOS app launch..."
+                class="textarea textarea-bordered w-full h-20 bg-surface-overlay border-white/10"
+              ></textarea>
+              <p class="text-xs text-subtle mt-2">
+                This appears during the final third of your presentation time.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Error -->
+        <div v-if="error" class="p-4 bg-error/10 border border-error/30 rounded-xl">
+          <p class="text-sm text-error text-center">{{ error }}</p>
+        </div>
+
+        <!-- Submit Button -->
+        <button
+          class="btn btn-primary btn-lg w-full font-display font-bold animate-fade-up delay-300"
+          :disabled="loading || !name.trim() || !projectName.trim() || !projectDescription.trim()"
+          @click="submit"
+        >
+          <span v-if="loading" class="loading loading-spinner"></span>
+          <span v-else class="flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            Join the Queue
+          </span>
+        </button>
       </div>
     </main>
   </div>
 </template>
+
+<style scoped>
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 2rem);
+}
+</style>

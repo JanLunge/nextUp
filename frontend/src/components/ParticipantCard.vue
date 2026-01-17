@@ -33,22 +33,31 @@ function handleClick(): void {
 
 <template>
   <div
-    class="card bg-base-100 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+    class="card bg-surface-elevated border border-white/5 cursor-pointer hover-lift"
     @click="handleClick"
   >
-    <div class="card-body p-4">
-      <div class="flex items-start gap-3">
+    <div :class="['p-4', compact ? 'py-3' : '']">
+      <div class="flex items-start gap-4">
         <!-- Profile Image -->
-        <div class="avatar">
-          <div :class="compact ? 'w-10 rounded-full' : 'w-12 rounded-full'">
+        <div class="shrink-0">
+          <div
+            :class="[
+              'rounded-full overflow-hidden',
+              compact ? 'w-10 h-10' : 'w-12 h-12'
+            ]"
+          >
             <img
               v-if="profileImageUrl"
               :src="profileImageUrl"
               :alt="participant.name"
+              class="w-full h-full object-cover"
             />
             <div
               v-else
-              class="bg-neutral text-neutral-content flex items-center justify-center w-full h-full"
+              :class="[
+                'w-full h-full flex items-center justify-center bg-coral/20 text-coral font-display font-bold',
+                compact ? 'text-sm' : 'text-lg'
+              ]"
             >
               {{ participant.name?.charAt(0)?.toUpperCase() }}
             </div>
@@ -57,31 +66,33 @@ function handleClick(): void {
 
         <!-- Info -->
         <div class="flex-1 min-w-0">
-          <h3 class="font-semibold truncate">{{ participant.name }}</h3>
-          <p v-if="participant.tagline && !compact" class="text-sm text-base-content/70 truncate">
+          <h3 class="font-display font-bold text-cream truncate">{{ participant.name }}</h3>
+          <p
+            v-if="participant.tagline && !compact"
+            class="text-sm text-subtle truncate"
+          >
             {{ participant.tagline }}
           </p>
-          <p class="text-sm font-medium text-primary truncate">
+          <p class="text-sm font-medium text-coral truncate">
             {{ participant.project_name }}
           </p>
-          <p v-if="participant.project_url && !compact" class="text-xs text-base-content/60 truncate">
-            <a
-              :href="participant.project_url"
-              target="_blank"
-              rel="noopener"
-              class="link link-hover"
-              @click.stop
-            >
-              {{ participant.project_url }}
-            </a>
-          </p>
+          <a
+            v-if="participant.project_url && !compact"
+            :href="participant.project_url"
+            target="_blank"
+            rel="noopener"
+            class="text-xs text-subtle hover:text-cream transition-colors truncate inline-block"
+            @click.stop
+          >
+            {{ participant.project_url }}
+          </a>
         </div>
 
         <!-- Wave Button -->
         <WaveButton
           v-if="showWaveButton"
           :has-waved="hasWaved"
-          size="sm"
+          :size="compact ? 'sm' : 'md'"
           @wave="emit('wave', participant)"
           @click.stop
         />
@@ -90,10 +101,10 @@ function handleClick(): void {
       <!-- Current Need -->
       <div
         v-if="participant.current_need && !compact"
-        class="mt-2 p-2 bg-base-200 rounded-lg text-sm"
+        class="mt-3 p-3 bg-coral/5 border border-coral/10 rounded-xl"
       >
-        <span class="text-base-content/70">Looking for:</span>
-        <span class="ml-1">{{ participant.current_need }}</span>
+        <span class="text-xs text-coral font-medium uppercase tracking-wider">Looking for:</span>
+        <span class="ml-2 text-sm text-cream/80">{{ participant.current_need }}</span>
       </div>
     </div>
   </div>

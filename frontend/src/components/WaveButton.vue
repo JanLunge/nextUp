@@ -27,7 +27,6 @@ async function handleWave(): Promise<void> {
   loading.value = true;
   emit('wave');
 
-  // Reset loading after a short delay
   setTimeout(() => {
     loading.value = false;
   }, 500);
@@ -37,17 +36,19 @@ async function handleWave(): Promise<void> {
 <template>
   <button
     :class="[
-      'btn gap-2',
-      hasWaved ? 'btn-ghost' : 'btn-primary',
+      'btn gap-2 font-display font-semibold transition-all duration-200',
+      hasWaved
+        ? 'bg-success/20 border-success/30 text-success hover:bg-success/25'
+        : 'btn-primary',
       size === 'sm' && 'btn-sm',
       size === 'lg' && 'btn-lg',
     ]"
     :disabled="hasWaved || disabled || loading"
-    @click="handleWave"
+    @click.stop="handleWave"
   >
     <span v-if="loading" class="loading loading-spinner loading-sm"></span>
     <template v-else>
-      <span>{{ hasWaved ? '✓' : '👋' }}</span>
+      <span class="text-lg">{{ hasWaved ? '✓' : '👋' }}</span>
       <span>{{ hasWaved ? 'Waved' : label }}</span>
     </template>
   </button>

@@ -82,45 +82,80 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-base-200 presenter-display flex flex-col">
+  <div class="h-screen bg-surface presenter-display flex flex-col relative overflow-hidden">
+    <!-- Background ambient -->
+    <div class="absolute inset-0 pointer-events-none">
+      <div class="absolute top-0 left-1/4 w-[600px] h-[300px] bg-coral/5 rounded-full blur-[100px]"></div>
+      <div class="absolute bottom-0 right-1/4 w-[400px] h-[200px] bg-coral/3 rounded-full blur-[80px]"></div>
+    </div>
+
     <!-- Wave Emitter -->
     <WaveEmitter ref="waveEmitter" />
 
     <!-- Header -->
-    <header class="bg-base-100 shadow-sm px-6 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-4">
-        <span class="font-mono text-lg font-medium">{{ roomId }}</span>
-        <div
-          :class="[
-            'badge',
-            isConnected ? 'badge-success' : 'badge-error',
-          ]"
-        >
-          {{ isConnected ? 'Live' : 'Disconnected' }}
+    <header class="relative z-20 glass-dark px-8 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-6">
+        <!-- Room Code -->
+        <div class="flex items-center gap-3">
+          <span class="room-code text-2xl text-coral">{{ roomId }}</span>
+          <div class="flex items-center gap-2">
+            <span
+              :class="[
+                'status-dot',
+                isConnected ? 'status-dot-live' : 'status-dot-offline'
+              ]"
+            ></span>
+            <span :class="['text-sm font-medium', isConnected ? 'text-success' : 'text-error']">
+              {{ isConnected ? 'Live' : 'Offline' }}
+            </span>
+          </div>
         </div>
       </div>
 
-      <div class="flex items-center gap-4">
-        <span class="text-base-content/70">
-          Queue: <span class="font-semibold">{{ queueCount }}</span> remaining
-        </span>
+      <div class="flex items-center gap-6">
+        <!-- Queue Count -->
+        <div class="text-right">
+          <p class="text-xs text-subtle uppercase tracking-wider">In Queue</p>
+          <p class="text-2xl font-display font-bold text-cream">{{ queueCount }}</p>
+        </div>
+
+        <!-- Timer Display (hidden for now) -->
+        <!-- <div
+          v-if="timer.isRunning.value || timer.remaining.value < timer.duration.value"
+          class="px-6 py-2 rounded-xl bg-surface-overlay border border-white/10"
+        >
+          <p
+            :class="[
+              'text-3xl font-mono font-bold tabular-nums',
+              timer.timerClass.value
+            ]"
+          >
+            {{ timer.displayTime.value }}
+          </p>
+        </div> -->
+
+        <!-- QR Dropdown -->
         <QRDropdown :room-id="roomId" :admin-key="adminKey" />
       </div>
     </header>
 
     <!-- Main Content -->
-    <main class="flex-1 overflow-hidden">
+    <main class="relative z-10 flex-1 min-h-0 overflow-hidden">
       <CurrentPresenter
         :participant="currentParticipant"
         :show-need="timer.showNeed.value"
+        :timer-progress="timer.progress.value"
+        :is-overtime="timer.isOvertime.value"
+        :room-id="roomId"
       />
     </main>
 
     <!-- Footer / Up Next -->
-    <footer>
+    <footer class="relative z-20">
       <UpNext
         :participant="nextParticipant"
         :timer-running="timer.isRunning.value"
+        :queue-count="queueCount"
       />
     </footer>
   </div>

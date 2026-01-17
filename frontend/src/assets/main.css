@@ -1,60 +1,163 @@
 @import "tailwindcss";
-@plugin "daisyui";
+@plugin "daisyui" {
+  themes: false;
+}
 
-/* Custom styles */
+/* ═══════════════════════════════════════════════════════════════════════════
+   NextUp Custom Theme — "Stage Presence"
+   A theatrical, energetic design for live presentation events
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Custom DaisyUI Theme */
+@theme {
+  /* Custom color palette */
+  --color-coral: #FF6B4A;
+  --color-coral-dark: #E85A3A;
+  --color-coral-light: #FF8266;
+  --color-cream: #FFF8F0;
+  --color-charcoal: #1A1A1A;
+  --color-charcoal-light: #2A2A2A;
+  --color-slate: #3A3A3A;
+  --color-muted: #6B6B6B;
+  --color-subtle: #9A9A9A;
+
+  /* Semantic colors */
+  --color-surface: #0F0F0F;
+  --color-surface-elevated: #1A1A1A;
+  --color-surface-overlay: #252525;
+
+  /* Status colors */
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-info: #3B82F6;
+}
+
+/* DaisyUI Theme Configuration */
+[data-theme="nextup"] {
+  --p: 15 95% 65%; /* coral primary */
+  --pf: 15 90% 55%; /* coral darker */
+  --pc: 0 0% 100%; /* white text on primary */
+
+  --s: 30 100% 96%; /* cream secondary */
+  --sf: 30 80% 90%;
+  --sc: 0 0% 10%;
+
+  --a: 15 95% 65%; /* accent same as primary */
+  --af: 15 90% 55%;
+  --ac: 0 0% 100%;
+
+  --n: 0 0% 15%; /* neutral charcoal */
+  --nf: 0 0% 10%;
+  --nc: 0 0% 90%;
+
+  --b1: 0 0% 6%; /* base backgrounds - dark */
+  --b2: 0 0% 10%;
+  --b3: 0 0% 15%;
+  --bc: 0 0% 95%; /* base content - light text */
+
+  --su: 160 84% 39%; /* success green */
+  --wa: 38 92% 50%; /* warning amber */
+  --er: 0 84% 60%; /* error red */
+  --in: 217 91% 60%; /* info blue */
+
+  --rounded-box: 1rem;
+  --rounded-btn: 0.75rem;
+  --rounded-badge: 0.5rem;
+  --animation-btn: 0.2s;
+  --animation-input: 0.2s;
+  --btn-focus-scale: 0.98;
+  --border-btn: 1px;
+  --tab-border: 1px;
+  --tab-radius: 0.5rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Typography
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 body {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   min-height: 100vh;
+  background-color: var(--color-surface);
+  color: var(--color-cream);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Wave animation */
-@keyframes float-up {
-  0% {
-    opacity: 1;
-    transform: translateY(0) rotate(0deg);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-200px) rotate(15deg);
-  }
+h1, h2, h3, h4, h5, h6,
+.font-display {
+  font-family: 'Syne', system-ui, sans-serif;
+  letter-spacing: -0.02em;
 }
 
-.wave-emoji {
-  animation: float-up 2s ease-out forwards;
-  position: fixed;
-  font-size: 2rem;
+.font-body {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Custom Components
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Gradient backgrounds */
+.bg-gradient-radial {
+  background: radial-gradient(ellipse at top, var(--color-charcoal-light) 0%, var(--color-surface) 70%);
+}
+
+.bg-gradient-stage {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255, 107, 74, 0.15) 0%, transparent 50%),
+    var(--color-surface);
+}
+
+/* Glow effects */
+.glow-coral {
+  box-shadow: 0 0 40px rgba(255, 107, 74, 0.3), 0 0 80px rgba(255, 107, 74, 0.15);
+}
+
+.glow-coral-sm {
+  box-shadow: 0 0 20px rgba(255, 107, 74, 0.25);
+}
+
+.glow-success {
+  box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
+}
+
+/* Glass effect */
+.glass-dark {
+  background: rgba(26, 26, 26, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Noise texture overlay */
+.noise::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
   pointer-events: none;
-  z-index: 100;
+  z-index: 1;
 }
 
-/* Timer color phases */
-.timer-green {
-  color: oklch(var(--su));
+/* Gradient text */
+.text-gradient {
+  background: linear-gradient(135deg, var(--color-coral) 0%, var(--color-coral-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.timer-yellow {
-  color: oklch(var(--wa));
-}
+/* ═══════════════════════════════════════════════════════════════════════════
+   Animations
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-.timer-red {
-  color: oklch(var(--er));
-}
-
-.timer-overtime {
-  color: oklch(var(--er));
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-/* Presenter display optimizations */
-.presenter-display {
-  background-color: oklch(var(--b2));
-  color: oklch(var(--bc));
-}
-
-/* Current need fade-in */
-@keyframes fade-in {
+/* Entrance animations */
+@keyframes fade-up {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -62,22 +165,324 @@ body {
   }
 }
 
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.5s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Stagger delays */
+.delay-75 { animation-delay: 75ms; }
+.delay-150 { animation-delay: 150ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+
+/* Wave animation */
+@keyframes float-up {
+  0% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateY(-100px) rotate(10deg) scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-200px) rotate(20deg) scale(0.8);
+  }
+}
+
+.wave-emoji {
+  animation: float-up 2s ease-out forwards;
+  position: fixed;
+  font-size: 3rem;
+  pointer-events: none;
+  z-index: 100;
+  filter: drop-shadow(0 0 10px rgba(255, 107, 74, 0.5));
+}
+
+/* Timer color phases */
+.timer-green {
+  color: var(--color-success);
+  text-shadow: 0 0 40px rgba(16, 185, 129, 0.5);
+}
+
+.timer-yellow {
+  color: var(--color-warning);
+  text-shadow: 0 0 40px rgba(245, 158, 11, 0.5);
+}
+
+.timer-red {
+  color: var(--color-error);
+  text-shadow: 0 0 40px rgba(239, 68, 68, 0.5);
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    transform: scale(1);
+    text-shadow: 0 0 40px rgba(239, 68, 68, 0.5);
+  }
+  50% {
+    transform: scale(1.02);
+    text-shadow: 0 0 60px rgba(239, 68, 68, 0.7), 0 0 100px rgba(239, 68, 68, 0.4);
+  }
+}
+
+.timer-overtime {
+  color: var(--color-error);
+  animation: pulse-glow 1.5s ease-in-out infinite;
+}
+
+/* Current need fade-in */
 .need-fade-in {
-  animation: fade-in 0.5s ease-out forwards;
+  animation: fade-up 0.6s ease-out forwards;
 }
 
 /* You're next modal pulse */
 @keyframes next-pulse {
   0%, 100% {
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7);
+    box-shadow: 0 0 0 0 rgba(255, 107, 74, 0.7);
   }
   50% {
     transform: scale(1.02);
-    box-shadow: 0 0 0 20px rgba(99, 102, 241, 0);
+    box-shadow: 0 0 0 30px rgba(255, 107, 74, 0);
   }
 }
 
 .next-pulse {
   animation: next-pulse 1.5s infinite;
+}
+
+/* Shimmer loading effect */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(90deg,
+    var(--color-charcoal) 25%,
+    var(--color-charcoal-light) 50%,
+    var(--color-charcoal) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Hover lift effect */
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Component Overrides
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Cards */
+.card {
+  background: var(--color-surface-elevated);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.card-elevated {
+  background: var(--color-surface-overlay);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Inputs */
+.input, .textarea, .select {
+  background: var(--color-surface-elevated);
+  border-color: rgba(255, 255, 255, 0.1);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input:focus, .textarea:focus, .select:focus {
+  border-color: var(--color-coral);
+  box-shadow: 0 0 0 3px rgba(255, 107, 74, 0.15);
+}
+
+/* Primary buttons */
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-coral) 0%, var(--color-coral-dark) 100%);
+  border: none;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--color-coral-light) 0%, var(--color-coral) 100%);
+  box-shadow: 0 0 30px rgba(255, 107, 74, 0.4);
+}
+
+/* Ghost buttons */
+.btn-ghost {
+  color: var(--color-subtle);
+  transition: all 0.2s ease;
+}
+
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-cream);
+}
+
+/* Badges */
+.badge-live {
+  background: var(--color-success);
+  color: white;
+  animation: pulse 2s infinite;
+}
+
+/* Progress bars */
+.progress {
+  background: var(--color-charcoal);
+  overflow: hidden;
+}
+
+.progress::-webkit-progress-value {
+  transition: width 0.3s ease;
+}
+
+/* Tabs */
+.tabs-boxed {
+  background: var(--color-surface-elevated);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 0.25rem;
+}
+
+.tab-active {
+  background: var(--color-coral) !important;
+  color: white !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Utility Classes
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Status indicator dot */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-dot-live {
+  background: var(--color-success);
+  box-shadow: 0 0 10px var(--color-success);
+  animation: pulse 2s infinite;
+}
+
+.status-dot-offline {
+  background: var(--color-error);
+}
+
+/* Section divider */
+.divider-glow {
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 107, 74, 0.3) 50%,
+    transparent 100%
+  );
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-slate);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-muted);
+}
+
+/* Selection styling */
+::selection {
+  background: rgba(255, 107, 74, 0.3);
+  color: white;
+}
+
+/* Focus ring */
+:focus-visible {
+  outline: 2px solid var(--color-coral);
+  outline-offset: 2px;
+}
+
+/* Room code styling */
+.room-code {
+  font-family: 'Syne', monospace;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: lowercase;
+}
+
+/* Avatar ring */
+.avatar-ring {
+  border: 2px solid var(--color-coral);
+  box-shadow: 0 0 20px rgba(255, 107, 74, 0.3);
+}
+
+/* Presenter display optimizations */
+.presenter-display {
+  background: var(--color-surface);
 }

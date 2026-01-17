@@ -6,11 +6,13 @@ import type { Participant } from '@/types';
 interface Props {
   participant?: Participant | null;
   timerRunning?: boolean;
+  queueCount?: number;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   participant: null,
   timerRunning: false,
+  queueCount: 0,
 });
 
 const profileImageUrl = computed(() => {
@@ -20,42 +22,65 @@ const profileImageUrl = computed(() => {
 </script>
 
 <template>
-  <div class="bg-base-300 p-4 flex items-center justify-between">
-    <div class="flex items-center gap-4">
-      <span class="text-base-content/60 font-medium">Up next:</span>
+  <div class="glass-dark px-8 py-5 flex items-center justify-between">
+    <div class="flex items-center gap-6">
+      <!-- Up Next Label -->
+      <div class="flex items-center gap-2">
+        <svg class="w-5 h-5 text-coral" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+        </svg>
+        <span class="text-sm font-medium text-subtle uppercase tracking-wider">Up Next</span>
+      </div>
 
       <template v-if="participant">
+        <!-- Divider -->
+        <div class="w-px h-8 bg-white/10"></div>
+
         <!-- Avatar -->
-        <div class="avatar">
-          <div class="w-10 rounded-full">
-            <img
-              v-if="profileImageUrl"
-              :src="profileImageUrl"
-              :alt="participant.name"
-            />
-            <div
-              v-else
-              class="w-full h-full flex items-center justify-center bg-neutral text-neutral-content"
-            >
-              {{ participant.name?.charAt(0)?.toUpperCase() }}
-            </div>
+        <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-coral/30">
+          <img
+            v-if="profileImageUrl"
+            :src="profileImageUrl"
+            :alt="participant.name"
+            class="w-full h-full object-cover"
+          />
+          <div
+            v-else
+            class="w-full h-full flex items-center justify-center bg-surface-overlay text-lg font-display font-bold text-coral"
+          >
+            {{ participant.name?.charAt(0)?.toUpperCase() }}
           </div>
         </div>
 
         <!-- Info -->
         <div>
-          <span class="font-semibold">{{ participant.name }}</span>
-          <span class="mx-2">—</span>
-          <span class="text-primary">"{{ participant.project_name }}"</span>
+          <p class="font-display font-bold text-lg text-cream">{{ participant.name }}</p>
+          <p class="text-coral text-sm">"{{ participant.project_name }}"</p>
         </div>
       </template>
 
-      <span v-else class="text-base-content/40">No one in queue</span>
+      <template v-else>
+        <div class="w-px h-8 bg-white/10"></div>
+        <p class="text-subtle">
+          {{ queueCount > 0 ? 'Preparing next presenter...' : 'No one in queue' }}
+        </p>
+      </template>
     </div>
 
-    <!-- Hint -->
-    <div v-if="!timerRunning" class="text-base-content/60 text-sm">
-      [SPACE to start]
+    <!-- Keyboard Hint -->
+    <div class="flex items-center gap-6">
+      <div v-if="!timerRunning && participant" class="flex items-center gap-3 text-subtle">
+        <kbd class="px-3 py-1.5 rounded-lg bg-surface-overlay border border-white/10 text-sm font-mono">
+          SPACE
+        </kbd>
+        <span class="text-sm">to start timer</span>
+      </div>
+
+      <!-- Queue indicator -->
+      <div v-if="queueCount > 1" class="flex items-center gap-2 px-4 py-2 rounded-full bg-surface-overlay border border-white/5">
+        <span class="text-coral font-display font-bold">+{{ queueCount - 1 }}</span>
+        <span class="text-sm text-subtle">more in queue</span>
+      </div>
     </div>
   </div>
 </template>

@@ -71,25 +71,30 @@ async function withdraw(): Promise<void> {
   }
 }
 
-// Get status badge class
-function getStatusBadgeClass(status: string): string {
+// Get status info
+function getStatusInfo(status: string): { color: string; label: string; icon: string } {
   switch (status) {
     case 'queued':
-      return 'badge-info';
+      return { color: 'text-info', label: 'In Queue', icon: '⏳' };
     case 'presenting':
-      return 'badge-success';
+      return { color: 'text-coral', label: 'Now Presenting', icon: '🎤' };
     case 'presented':
-      return 'badge-neutral';
+      return { color: 'text-success', label: 'Presented', icon: '✓' };
     case 'withdrawn':
-      return 'badge-error';
+      return { color: 'text-error', label: 'Withdrawn', icon: '✕' };
     default:
-      return 'badge-ghost';
+      return { color: 'text-subtle', label: status, icon: '•' };
   }
 }
 
 // Go back to room view
 function goBack(): void {
   router.push({ name: 'roomView', params: { roomId: roomId.value } });
+}
+
+// Go to waves view
+function goToWaves(): void {
+  router.push({ name: 'waves', params: { roomId: roomId.value } });
 }
 
 // Get media URL
@@ -104,97 +109,154 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-base-200">
+  <div class="min-h-screen bg-surface">
     <!-- Header -->
-    <header class="bg-base-100 shadow-sm">
-      <div class="container mx-auto px-4 py-3">
+    <header class="glass-dark sticky top-0 z-10">
+      <div class="px-4 py-4">
         <div class="flex items-center gap-4">
-          <button class="btn btn-ghost btn-sm" @click="goBack">
-            ← Back
+          <button class="btn btn-ghost btn-sm btn-square" @click="goBack">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
           </button>
-          <h1 class="font-semibold">My Submission</h1>
+          <h1 class="font-display font-bold text-cream">My Submission</h1>
         </div>
       </div>
     </header>
 
     <!-- Loading -->
-    <div v-if="loading" class="flex items-center justify-center min-h-[50vh]">
-      <span class="loading loading-spinner loading-lg"></span>
+    <div v-if="loading" class="flex items-center justify-center min-h-[60vh]">
+      <div class="text-center">
+        <div class="w-12 h-12 mx-auto mb-4 rounded-full border-2 border-coral border-t-transparent animate-spin"></div>
+        <p class="text-subtle">Loading...</p>
+      </div>
     </div>
 
     <!-- Error -->
-    <div v-else-if="error" class="container mx-auto px-4 py-6">
-      <div class="alert alert-error">
-        <span>{{ error }}</span>
+    <div v-else-if="error" class="px-4 py-6">
+      <div class="max-w-lg mx-auto p-4 bg-error/10 border border-error/30 rounded-xl">
+        <p class="text-error text-center">{{ error }}</p>
       </div>
     </div>
 
     <!-- Submission Details -->
-    <main v-else-if="submission" class="container mx-auto px-4 py-6">
-      <div class="card bg-base-100 shadow-lg max-w-lg mx-auto">
-        <div class="card-body">
-          <!-- Status -->
-          <div class="flex items-center justify-between mb-4">
-            <div :class="['badge', 'badge-lg', getStatusBadgeClass(submission.status)]">
-              {{ submission.status }}
-            </div>
-            <div v-if="submission.status === 'queued'" class="text-sm text-base-content/70">
-              Position: #{{ submission.queue_position }}
+    <main v-else-if="submission" class="px-4 py-6">
+      <div class="max-w-lg mx-auto space-y-6">
+        <!-- Status Card -->
+        <div
+          :class="[
+            'card border animate-fade-up',
+            submission.status === 'presenting' ? 'bg-coral/10 border-coral/30' :
+            submission.status === 'presented' ? 'bg-success/10 border-success/30' :
+            'bg-surface-elevated border-white/5'
+          ]"
+        >
+          <div class="p-5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <span class="text-2xl">{{ getStatusInfo(submission.status).icon }}</span>
+                <div>
+                  <p :class="['font-display font-bold text-lg', getStatusInfo(submission.status).color]">
+                    {{ getStatusInfo(submission.status).label }}
+                  </p>
+                  <p v-if="submission.status === 'queued'" class="text-sm text-subtle">
+                    Position #{{ submission.queue_position }} in queue
+                  </p>
+                </div>
+              </div>
+
+              <!-- Presenting animation -->
+              <div v-if="submission.status === 'presenting'" class="flex gap-1">
+                <span class="w-2 h-2 rounded-full bg-coral animate-bounce" style="animation-delay: 0ms;"></span>
+                <span class="w-2 h-2 rounded-full bg-coral animate-bounce" style="animation-delay: 150ms;"></span>
+                <span class="w-2 h-2 rounded-full bg-coral animate-bounce" style="animation-delay: 300ms;"></span>
+              </div>
             </div>
           </div>
+        </div>
 
-          <!-- Media Preview -->
-          <div v-if="getMediaUrl(submission.presentation_media_path)" class="mb-4">
+        <!-- Media Preview -->
+        <div v-if="getMediaUrl(submission.presentation_media_path)" class="animate-fade-up delay-150">
+          <div class="rounded-xl overflow-hidden bg-surface-elevated border border-white/5">
             <video
               v-if="submission.media_type === 'video'"
               :src="getMediaUrl(submission.presentation_media_path) ?? undefined"
               controls
-              class="w-full rounded-lg aspect-video object-cover"
+              class="w-full aspect-video object-cover"
             ></video>
             <img
               v-else
               :src="getMediaUrl(submission.presentation_media_path) ?? undefined"
               :alt="submission.project_name"
-              class="w-full rounded-lg aspect-video object-cover"
+              class="w-full aspect-video object-cover"
             />
           </div>
+        </div>
 
-          <!-- Project Info -->
-          <h2 class="text-xl font-bold">{{ submission.project_name }}</h2>
+        <!-- Project Info -->
+        <div class="card bg-surface-elevated border border-white/5 animate-fade-up delay-200">
+          <div class="p-5 space-y-4">
+            <div>
+              <h2 class="font-display text-2xl font-bold text-coral">{{ submission.project_name }}</h2>
+              <a
+                v-if="submission.project_url"
+                :href="submission.project_url"
+                target="_blank"
+                rel="noopener"
+                class="text-sm text-subtle hover:text-cream transition-colors"
+              >
+                {{ submission.project_url }}
+              </a>
+            </div>
 
-          <a
-            v-if="submission.project_url"
-            :href="submission.project_url"
-            target="_blank"
-            rel="noopener"
-            class="link link-primary text-sm"
+            <p class="text-cream/80">{{ submission.project_description }}</p>
+
+            <!-- Current Need -->
+            <div
+              v-if="submission.current_need"
+              class="p-4 bg-coral/10 border border-coral/20 rounded-xl"
+            >
+              <p class="text-xs text-coral uppercase tracking-wider font-medium mb-1">Looking For</p>
+              <p class="text-cream">{{ submission.current_need }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="space-y-3 animate-fade-up delay-300">
+          <!-- Withdraw (only if queued) -->
+          <button
+            v-if="submission.status === 'queued'"
+            class="btn btn-outline w-full border-error/30 text-error hover:bg-error/10 hover:border-error"
+            @click="withdraw"
           >
-            {{ submission.project_url }}
-          </a>
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            Withdraw Submission
+          </button>
 
-          <p class="text-base-content/80 mt-2">
-            {{ submission.project_description }}
-          </p>
-
-          <!-- Current Need -->
+          <!-- Presented Success -->
           <div
-            v-if="submission.current_need"
-            class="mt-4 p-3 bg-primary/10 border border-primary/20 rounded-lg"
+            v-if="submission.status === 'presented'"
+            class="p-4 bg-success/10 border border-success/30 rounded-xl"
           >
-            <span class="font-medium">Looking for:</span>
-            <span class="ml-2">{{ submission.current_need }}</span>
-          </div>
-
-          <!-- Actions -->
-          <div v-if="submission.status === 'queued'" class="card-actions mt-6">
-            <button class="btn btn-error btn-outline w-full" @click="withdraw">
-              Withdraw Submission
+            <div class="flex items-start gap-3">
+              <svg class="w-6 h-6 text-success shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <p class="font-medium text-success">Great presentation!</p>
+                <p class="text-sm text-subtle mt-1">Check your waves to see who wants to connect with you.</p>
+              </div>
+            </div>
+            <button
+              class="btn btn-success w-full mt-4"
+              @click="goToWaves"
+            >
+              <span class="text-lg mr-2">👋</span>
+              View My Waves
             </button>
-          </div>
-
-          <!-- Presented Message -->
-          <div v-else-if="submission.status === 'presented'" class="alert alert-success mt-6">
-            <span>You've presented! Check your waves to see who wants to connect.</span>
           </div>
         </div>
       </div>

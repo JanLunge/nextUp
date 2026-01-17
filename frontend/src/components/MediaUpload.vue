@@ -29,6 +29,18 @@ const previewUrl = computed(() => {
   return api.getUploadUrl(props.modelValue);
 });
 
+const isVideo = computed(() => {
+  if (!props.modelValue) return false;
+  return props.modelValue.match(/\.(mp4|webm|mov|avi)$/i) !== null;
+});
+
+const acceptTypes = computed(() => {
+  if (props.type === 'profile') {
+    return 'image/*';
+  }
+  return props.accept;
+});
+
 async function handleFileChange(event: Event): Promise<void> {
   const target = event.target as HTMLInputElement;
   const file = target.files?.[0];
@@ -66,24 +78,42 @@ function clearUpload(): void {
     <input
       ref="fileInput"
       type="file"
-      :accept="accept"
+      :accept="acceptTypes"
       class="hidden"
       @change="handleFileChange"
     />
 
     <!-- Preview -->
     <div v-if="previewUrl" class="relative">
-      <img
-        :src="previewUrl"
-        alt="Preview"
-        class="w-full h-48 object-cover rounded-lg"
-      />
+      <div
+        :class="[
+          'rounded-xl overflow-hidden bg-surface-overlay border border-white/10',
+          type === 'profile' ? 'w-24 h-24' : 'w-full aspect-video'
+        ]"
+      >
+        <video
+          v-if="isVideo"
+          :src="previewUrl"
+          class="w-full h-full object-cover"
+          muted
+          playsinline
+        ></video>
+        <img
+          v-else
+          :src="previewUrl"
+          alt="Preview"
+          class="w-full h-full object-cover"
+        />
+      </div>
+      <!-- Remove button -->
       <button
         type="button"
-        class="btn btn-circle btn-sm btn-error absolute top-2 right-2"
+        class="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-error text-white flex items-center justify-center hover:bg-error/80 transition-colors"
         @click="clearUpload"
       >
-        ✕
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
       </button>
     </div>
 
@@ -91,18 +121,23 @@ function clearUpload(): void {
     <button
       v-else
       type="button"
-      class="btn btn-outline w-full h-32 flex flex-col gap-2"
+      :class="[
+        'border-2 border-dashed border-white/20 rounded-xl flex items-center justify-center gap-3 text-subtle hover:border-coral/50 hover:text-coral transition-all',
+        type === 'profile' ? 'w-24 h-24' : 'w-full py-8'
+      ]"
       :disabled="loading"
       @click="triggerUpload"
     >
-      <span v-if="loading" class="loading loading-spinner"></span>
+      <span v-if="loading" class="loading loading-spinner loading-sm"></span>
       <template v-else>
-        <span class="text-2xl">+</span>
-        <span>{{ label }}</span>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+        </svg>
+        <span v-if="type !== 'profile'" class="text-sm font-medium">{{ label }}</span>
       </template>
     </button>
 
     <!-- Error -->
-    <p v-if="error" class="text-error text-sm mt-2">{{ error }}</p>
+    <p v-if="error" class="text-error text-xs mt-2">{{ error }}</p>
   </div>
 </template>

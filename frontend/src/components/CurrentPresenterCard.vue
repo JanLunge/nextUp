@@ -17,6 +17,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   wave: [participant: Participant];
+  click: [participant: Participant];
 }>();
 
 const profileImageUrl = computed(() => {
@@ -30,98 +31,104 @@ const mediaUrl = computed(() => {
 const isVideo = computed(() => {
   return props.participant.media_type === 'video';
 });
+
+function handleClick(): void {
+  emit('click', props.participant);
+}
 </script>
 
 <template>
-  <div class="card bg-base-100 shadow-lg">
-    <div class="card-body">
-      <div class="flex flex-col md:flex-row gap-6">
-        <!-- Media -->
-        <div v-if="mediaUrl" class="w-full md:w-1/2 lg:w-2/5">
-          <video
-            v-if="isVideo"
-            :src="mediaUrl"
-            autoplay
-            muted
-            loop
-            playsinline
-            class="w-full rounded-lg aspect-video object-cover"
-          ></video>
-          <img
-            v-else
-            :src="mediaUrl"
-            :alt="participant.project_name"
-            class="w-full rounded-lg aspect-video object-cover"
-          />
-        </div>
+  <div
+    class="card bg-surface-elevated border border-white/5 overflow-hidden cursor-pointer hover-lift"
+    @click="handleClick"
+  >
+    <div class="flex flex-col md:flex-row">
+      <!-- Media -->
+      <div v-if="mediaUrl" class="w-full md:w-2/5 shrink-0">
+        <video
+          v-if="isVideo"
+          :src="mediaUrl"
+          autoplay
+          muted
+          loop
+          playsinline
+          class="w-full h-48 md:h-full object-cover"
+        ></video>
+        <img
+          v-else
+          :src="mediaUrl"
+          :alt="participant.project_name"
+          class="w-full h-48 md:h-full object-cover"
+        />
+      </div>
 
-        <!-- Info -->
-        <div class="flex-1">
-          <!-- Profile -->
-          <div class="flex items-center gap-4 mb-4">
-            <div class="avatar">
-              <div class="w-16 rounded-full">
-                <img
-                  v-if="profileImageUrl"
-                  :src="profileImageUrl"
-                  :alt="participant.name"
-                />
-                <div
-                  v-else
-                  class="bg-neutral text-neutral-content flex items-center justify-center w-full h-full text-xl"
-                >
-                  {{ participant.name?.charAt(0)?.toUpperCase() }}
-                </div>
-              </div>
-            </div>
-            <div>
-              <h2 class="text-xl font-bold">{{ participant.name }}</h2>
-              <p v-if="participant.tagline" class="text-base-content/70">
-                {{ participant.tagline }}
-              </p>
-            </div>
-          </div>
-
-          <!-- Project -->
-          <div class="mb-4">
-            <h3 class="text-lg font-semibold text-primary">
-              {{ participant.project_name }}
-            </h3>
-            <a
-              v-if="participant.project_url"
-              :href="participant.project_url"
-              target="_blank"
-              rel="noopener"
-              class="link link-primary text-sm"
-            >
-              {{ participant.project_url }}
-            </a>
-          </div>
-
-          <!-- Description -->
-          <p class="text-base-content/80 mb-4">
-            {{ participant.project_description }}
-          </p>
-
-          <!-- Current Need -->
-          <div
-            v-if="participant.current_need"
-            class="p-3 bg-primary/10 border border-primary/20 rounded-lg"
-          >
-            <span class="font-medium">Looking for:</span>
-            <span class="ml-2">{{ participant.current_need }}</span>
-          </div>
-
-          <!-- Wave Button -->
-          <div v-if="showWaveButton" class="mt-4">
-            <WaveButton
-              :has-waved="hasWaved"
-              :label="`Wave at ${participant.name}`"
-              size="lg"
-              @wave="emit('wave', participant)"
+      <!-- Info -->
+      <div class="flex-1 p-5">
+        <!-- Profile -->
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-14 h-14 rounded-full overflow-hidden avatar-ring shrink-0">
+            <img
+              v-if="profileImageUrl"
+              :src="profileImageUrl"
+              :alt="participant.name"
+              class="w-full h-full object-cover"
             />
+            <div
+              v-else
+              class="w-full h-full flex items-center justify-center bg-coral/20 text-2xl font-display font-bold text-coral"
+            >
+              {{ participant.name?.charAt(0)?.toUpperCase() }}
+            </div>
+          </div>
+          <div class="min-w-0">
+            <h2 class="font-display text-xl font-bold text-cream truncate">{{ participant.name }}</h2>
+            <p v-if="participant.tagline" class="text-subtle truncate">
+              {{ participant.tagline }}
+            </p>
           </div>
         </div>
+
+        <!-- Project -->
+        <div class="mb-4">
+          <h3 class="font-display text-lg font-bold text-coral">
+            {{ participant.project_name }}
+          </h3>
+          <a
+            v-if="participant.project_url"
+            :href="participant.project_url"
+            target="_blank"
+            rel="noopener"
+            class="text-sm text-subtle hover:text-cream transition-colors"
+            @click.stop
+          >
+            {{ participant.project_url }}
+          </a>
+        </div>
+
+        <!-- Description -->
+        <p class="text-cream/80 text-sm line-clamp-2 mb-4">
+          {{ participant.project_description }}
+        </p>
+
+        <!-- Current Need -->
+        <div
+          v-if="participant.current_need"
+          class="p-3 bg-coral/10 border border-coral/20 rounded-xl mb-4"
+        >
+          <span class="text-xs text-coral font-medium uppercase tracking-wider">Looking for:</span>
+          <span class="ml-2 text-sm text-cream">{{ participant.current_need }}</span>
+        </div>
+
+        <!-- Wave Button -->
+        <WaveButton
+          v-if="showWaveButton"
+          :has-waved="hasWaved"
+          :label="`Wave at ${participant.name}`"
+          size="lg"
+          class="w-full"
+          @wave="emit('wave', participant)"
+          @click.stop
+        />
       </div>
     </div>
   </div>
