@@ -4,16 +4,13 @@ import { useRoute, useRouter } from 'vue-router';
 import { api } from '@/api/client';
 import { usePassphrase } from '@/composables/usePassphrase';
 
-interface WaveData {
-  id: number;
-  from_profile_id: number;
-  from_name: string;
-  from_tagline: string | null;
-  to_participant_id: number;
-  to_name: string;
-  to_project_name: string;
-  is_mutual: boolean;
-  created_at: string;
+import type { Wave } from '@/types';
+
+interface ReceivedWave {
+  profile_id: number;
+  name: string;
+  tagline?: string | null;
+  profile_image_path?: string | null;
 }
 
 const route = useRoute();
@@ -23,8 +20,8 @@ const roomId = computed(() => route.params.roomId as string);
 const { passphrase } = usePassphrase();
 
 // State
-const sentWaves = ref<WaveData[]>([]);
-const receivedWaves = ref<WaveData[]>([]);
+const sentWaves = ref<Wave[]>([]);
+const receivedWaves = ref<ReceivedWave[]>([]);
 const loading = ref(true);
 const error = ref<string | null>(null);
 const activeTab = ref<'received' | 'sent'>('received');
@@ -54,19 +51,6 @@ async function fetchWaves(): Promise<void> {
 function goBack(): void {
   router.push({ name: 'roomView', params: { roomId: roomId.value } });
 }
-
-// Format time
-function formatTime(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-}
-
-// Count mutual waves
-const mutualCount = computed(() => {
-  const receivedMutual = receivedWaves.value.filter(w => w.is_mutual).length;
-  const sentMutual = sentWaves.value.filter(w => w.is_mutual).length;
-  return Math.max(receivedMutual, sentMutual);
-});
 
 onMounted(() => {
   fetchWaves();
@@ -137,22 +121,6 @@ onMounted(() => {
 
     <!-- Waves List -->
     <main v-else class="px-4 pb-6">
-      <!-- Mutual Waves Banner -->
-      <div
-        v-if="mutualCount > 0 && !loading"
-        class="p-4 bg-success/10 border border-success/30 rounded-xl mb-4 animate-fade-up"
-      >
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-full bg-success/20 flex items-center justify-center">
-            <span class="text-xl">🤝</span>
-          </div>
-          <div>
-            <p class="font-display font-bold text-success">{{ mutualCount }} Mutual Waves!</p>
-            <p class="text-sm text-subtle">You both want to connect</p>
-          </div>
-        </div>
-      </div>
-
       <!-- Received Waves -->
       <div v-if="activeTab === 'received'" class="space-y-3">
         <div
@@ -170,39 +138,20 @@ onMounted(() => {
 
         <div
           v-for="(wave, index) in receivedWaves"
-          :key="wave.id"
-          :class="[
-            'card border animate-fade-up',
-            wave.is_mutual ? 'bg-success/5 border-success/30' : 'bg-surface-elevated border-white/5'
-          ]"
+          :key="wave.profile_id"
+          class="card border animate-fade-up bg-surface-elevated border-white/5"
           :style="{ animationDelay: `${index * 50}ms` }"
         >
           <div class="p-4">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div
-                  :class="[
-                    'w-11 h-11 rounded-full flex items-center justify-center font-display font-bold',
-                    wave.is_mutual ? 'bg-success/20 text-success' : 'bg-surface-overlay text-subtle'
-                  ]"
-                >
-                  {{ wave.from_name?.charAt(0)?.toUpperCase() }}
-                </div>
-                <div>
-                  <p class="font-semibold text-cream">{{ wave.from_name }}</p>
-                  <p v-if="wave.from_tagline" class="text-sm text-subtle">
-                    {{ wave.from_tagline }}
-                  </p>
-                </div>
+            <div class="flex items-center gap-3">
+              <div class="w-11 h-11 rounded-full flex items-center justify-center font-display font-bold bg-surface-overlay text-subtle">
+                {{ wave.name?.charAt(0)?.toUpperCase() }}
               </div>
-              <div class="flex items-center gap-2">
-                <span
-                  v-if="wave.is_mutual"
-                  class="px-2.5 py-1 bg-success/20 text-success text-xs font-medium rounded-full"
-                >
-                  Mutual
-                </span>
-                <span class="text-sm text-muted">{{ formatTime(wave.created_at) }}</span>
+              <div>
+                <p class="font-semibold text-cream">{{ wave.name }}</p>
+                <p v-if="wave.tagline" class="text-sm text-subtle">
+                  {{ wave.tagline }}
+                </p>
               </div>
             </div>
           </div>
@@ -226,55 +175,21 @@ onMounted(() => {
 
         <div
           v-for="(wave, index) in sentWaves"
-          :key="wave.id"
-          :class="[
-            'card border animate-fade-up',
-            wave.is_mutual ? 'bg-success/5 border-success/30' : 'bg-surface-elevated border-white/5'
-          ]"
+          :key="wave.profile_id"
+          class="card border animate-fade-up bg-surface-elevated border-white/5"
           :style="{ animationDelay: `${index * 50}ms` }"
         >
           <div class="p-4">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div
-                  :class="[
-                    'w-11 h-11 rounded-full flex items-center justify-center font-display font-bold',
-                    wave.is_mutual ? 'bg-success/20 text-success' : 'bg-coral/20 text-coral'
-                  ]"
-                >
-                  {{ wave.to_name?.charAt(0)?.toUpperCase() }}
-                </div>
-                <div>
-                  <p class="font-semibold text-cream">{{ wave.to_name }}</p>
-                  <p class="text-sm text-coral">"{{ wave.to_project_name }}"</p>
-                </div>
+            <div class="flex items-center gap-3">
+              <div class="w-11 h-11 rounded-full flex items-center justify-center font-display font-bold bg-coral/20 text-coral">
+                {{ wave.name?.charAt(0)?.toUpperCase() }}
               </div>
-              <div class="flex items-center gap-2">
-                <span
-                  v-if="wave.is_mutual"
-                  class="px-2.5 py-1 bg-success/20 text-success text-xs font-medium rounded-full"
-                >
-                  Mutual
-                </span>
-                <span class="text-sm text-muted">{{ formatTime(wave.created_at) }}</span>
+              <div>
+                <p class="font-semibold text-cream">{{ wave.name }}</p>
+                <p v-if="wave.project_name" class="text-sm text-coral">"{{ wave.project_name }}"</p>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      <!-- Info Banner -->
-      <div
-        v-if="!loading && (receivedWaves.length > 0 || sentWaves.length > 0)"
-        class="mt-6 p-4 bg-info/10 border border-info/30 rounded-xl animate-fade-up"
-      >
-        <div class="flex items-start gap-3">
-          <svg class="w-5 h-5 text-info shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <p class="text-sm text-info">
-            Mutual waves mean both parties are interested in connecting. Use the session networking time to meet up!
-          </p>
         </div>
       </div>
     </main>

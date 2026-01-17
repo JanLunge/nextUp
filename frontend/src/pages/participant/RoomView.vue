@@ -88,7 +88,7 @@ async function handleWave(participant: Participant): Promise<void> {
   if (!passphrase.value || wavedParticipants.value.has(participant.id)) return;
 
   try {
-    await api.sendWave(roomId.value, participant.id, passphrase.value);
+    await api.sendWave(roomId.value, passphrase.value, participant.id);
     wavedParticipants.value.add(participant.id);
   } catch (e) {
     console.error('Failed to send wave:', e);

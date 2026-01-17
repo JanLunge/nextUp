@@ -39,7 +39,7 @@ async function sendWave(): Promise<void> {
   if (!passphrase.value || !participant.value || hasWaved.value) return;
 
   try {
-    await api.sendWave(roomId.value, participant.value.id, passphrase.value);
+    await api.sendWave(roomId.value, passphrase.value, participant.value.id);
     hasWaved.value = true;
   } catch (e) {
     error.value = e instanceof Error ? e.message : 'Failed to send wave';
