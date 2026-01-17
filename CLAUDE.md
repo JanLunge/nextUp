@@ -120,4 +120,3 @@ FRONTEND_URL=http://localhost:5173
 
 - `projectIdea.md` — Full specification with wireframes, DB schema, API details
 
-now implement the projectIdea.md and go by each phase in the order that makes sense to you (Implementation Phases) and mark them as done if you finished them and update the file to reflect the current state of the project.

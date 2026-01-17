@@ -1,0 +1,83 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+/* Custom styles */
+body {
+  min-height: 100vh;
+}
+
+/* Wave animation */
+@keyframes float-up {
+  0% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-200px) rotate(15deg);
+  }
+}
+
+.wave-emoji {
+  animation: float-up 2s ease-out forwards;
+  position: fixed;
+  font-size: 2rem;
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* Timer color phases */
+.timer-green {
+  color: oklch(var(--su));
+}
+
+.timer-yellow {
+  color: oklch(var(--wa));
+}
+
+.timer-red {
+  color: oklch(var(--er));
+}
+
+.timer-overtime {
+  color: oklch(var(--er));
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Presenter display optimizations */
+.presenter-display {
+  background-color: oklch(var(--b2));
+  color: oklch(var(--bc));
+}
+
+/* Current need fade-in */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.need-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+/* You're next modal pulse */
+@keyframes next-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 20px rgba(99, 102, 241, 0);
+  }
+}
+
+.next-pulse {
+  animation: next-pulse 1.5s infinite;
+}
