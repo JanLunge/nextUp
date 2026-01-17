@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { api } from '@/api/client';
 import { usePassphrase } from '@/composables/usePassphrase';
@@ -17,6 +17,9 @@ const passphraseInput = ref('');
 const loading = ref(false);
 const error = ref<string | null>(null);
 const roomInfo = ref<Room | null>(null);
+
+// Template refs
+const nameInput = ref<HTMLInputElement | null>(null);
 
 // Join confirmation
 const showConfirmation = ref(false);
@@ -100,13 +103,17 @@ function copyPassphrase(): void {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   fetchRoomInfo();
 
   // Check if already has stored passphrase
   if (storedPassphrase.value) {
     passphraseInput.value = storedPassphrase.value;
   }
+
+  // Auto-focus name input
+  await nextTick();
+  nameInput.value?.focus();
 });
 </script>
 
@@ -208,6 +215,7 @@ onMounted(() => {
                   Your Name
                 </label>
                 <input
+                  ref="nameInput"
                   v-model="name"
                   type="text"
                   placeholder="Enter your name"

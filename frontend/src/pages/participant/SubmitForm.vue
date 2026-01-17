@@ -79,11 +79,6 @@ async function submit(): Promise<void> {
     return;
   }
 
-  if (!projectName.value.trim() || !projectDescription.value.trim()) {
-    error.value = 'Project name and description are required';
-    return;
-  }
-
   if (!passphrase.value) {
     error.value = 'You need to join the room first';
     return;
@@ -96,8 +91,8 @@ async function submit(): Promise<void> {
     await api.submitToQueue(roomId.value, {
       passphrase: passphrase.value,
       name: name.value.trim(),
-      project_name: projectName.value.trim(),
-      project_description: projectDescription.value.trim(),
+      project_name: projectName.value.trim() || undefined,
+      project_description: projectDescription.value.trim() || undefined,
       project_url: projectUrl.value.trim() || undefined,
       tagline: tagline.value.trim() || undefined,
       current_need: currentNeed.value.trim() || undefined,
@@ -221,7 +216,7 @@ onMounted(() => {
               <!-- Project Name -->
               <div>
                 <label class="block text-sm font-medium text-subtle uppercase tracking-wider mb-2">
-                  Project Name <span class="text-coral">*</span>
+                  Project Name
                 </label>
                 <input
                   v-model="projectName"
@@ -247,7 +242,7 @@ onMounted(() => {
               <!-- Description -->
               <div>
                 <label class="block text-sm font-medium text-subtle uppercase tracking-wider mb-2">
-                  Description <span class="text-coral">*</span>
+                  Description
                 </label>
                 <textarea
                   v-model="projectDescription"
@@ -305,7 +300,7 @@ onMounted(() => {
         <!-- Submit Button -->
         <button
           class="btn btn-primary btn-lg w-full font-display font-bold animate-fade-up delay-300"
-          :disabled="loading || !name.trim() || !projectName.trim() || !projectDescription.trim()"
+          :disabled="loading || !name.trim()"
           @click="submit"
         >
           <span v-if="loading" class="loading loading-spinner"></span>

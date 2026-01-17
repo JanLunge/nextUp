@@ -25,6 +25,9 @@ const waveEmitter = ref<WaveEmitterExpose | null>(null);
 // Room state
 const { room, currentParticipant, nextParticipant, queue, fetchRoom, fetchQueue, updateFromWebSocket } = useRoom(roomId);
 
+// Presented participants
+const presentedParticipants = ref<Participant[]>([]);
+
 // UI state
 const showYouAreNext = ref(false);
 const wavedParticipants = ref<Set<number>>(new Set());
@@ -48,6 +51,21 @@ function handleWebSocketMessage(message: WSMessage): void {
   // Handle "you are next" notification (sent only to the specific user)
   if (message.type === 'you_are_next') {
     showYouAreNext.value = true;
+  }
+
+  // Update presented list when presenter changes
+  if (message.type === 'presenter_changed') {
+    fetchPresentedParticipants();
+  }
+}
+
+// Fetch presented participants
+async function fetchPresentedParticipants(): Promise<void> {
+  try {
+    const result = await api.getPresentedParticipants(roomId.value);
+    presentedParticipants.value = result.participants;
+  } catch (e) {
+    console.error('Failed to fetch presented participants:', e);
   }
 }
 
@@ -114,6 +132,7 @@ onMounted(async () => {
   await fetchRoom();
   await fetchQueue();
   await fetchProfile();
+  await fetchPresentedParticipants();
   connect();
 });
 </script>
@@ -173,7 +192,7 @@ onMounted(async () => {
       </section>
 
       <!-- Empty State for No Presenter -->
-      <div v-else class="animate-fade-up">
+      <div v-else-if="!nextParticipant && queue.length === 0 && presentedParticipants.length === 0" class="animate-fade-up">
         <div class="card bg-surface-elevated border border-white/5">
           <div class="p-8 text-center">
             <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-coral/10 flex items-center justify-center">
@@ -182,6 +201,21 @@ onMounted(async () => {
               </svg>
             </div>
             <p class="text-subtle">Waiting for first presenter...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- All Done State -->
+      <div v-else-if="!nextParticipant && queue.length === 0 && presentedParticipants.length > 0" class="animate-fade-up">
+        <div class="card bg-success/10 border border-success/30">
+          <div class="p-8 text-center">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-success/20 flex items-center justify-center">
+              <svg class="w-8 h-8 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <p class="font-display text-lg font-bold text-cream mb-2">All presentations complete!</p>
+            <p class="text-subtle text-sm">{{ presentedParticipants.length }} {{ presentedParticipants.length === 1 ? 'person' : 'people' }} presented today.</p>
           </div>
         </div>
       </div>
@@ -224,8 +258,8 @@ onMounted(async () => {
         </div>
       </section>
 
-      <!-- Empty Queue State -->
-      <section v-else-if="!currentParticipant && !nextParticipant" class="animate-fade-up delay-200">
+      <!-- Empty Queue State (only when no one has presented yet) -->
+      <section v-else-if="!currentParticipant && !nextParticipant && presentedParticipants.length === 0" class="animate-fade-up delay-200">
         <div class="card bg-surface-elevated border border-white/5 border-dashed">
           <div class="p-8 text-center">
             <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-coral/10 flex items-center justify-center">
@@ -236,6 +270,32 @@ onMounted(async () => {
             <p class="font-display text-lg font-bold text-cream mb-2">Be the first to present!</p>
             <p class="text-subtle text-sm">The stage is empty. Submit your project to get started.</p>
           </div>
+        </div>
+      </section>
+
+      <!-- Presented History -->
+      <section v-if="presentedParticipants.length > 0" class="animate-fade-up delay-300">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="font-display text-sm font-bold text-subtle uppercase tracking-wider">
+            Already Presented
+          </h2>
+          <span class="px-2 py-1 bg-success/20 rounded-full text-xs text-success font-medium">
+            {{ presentedParticipants.length }}
+          </span>
+        </div>
+        <div class="space-y-3">
+          <ParticipantCard
+            v-for="(participant, index) in presentedParticipants"
+            :key="participant.id"
+            :participant="participant"
+            :has-waved="hasWavedAt(participant.id)"
+            :is-you="isCurrentUser(participant)"
+            :compact="true"
+            :class="['animate-fade-up opacity-75']"
+            :style="{ animationDelay: `${200 + index * 50}ms` }"
+            @wave="handleWave"
+            @click="goToPresenter(participant)"
+          />
         </div>
       </section>
     </main>

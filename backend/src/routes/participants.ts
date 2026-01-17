@@ -31,12 +31,6 @@ router.post('/:roomId/participants', (req: Request<RoomParams>, res: Response) =
     if (!name || !name.trim()) {
       return res.status(400).json({ error: 'Name is required' });
     }
-    if (!project_name || !project_name.trim()) {
-      return res.status(400).json({ error: 'Project name is required' });
-    }
-    if (!project_description || !project_description.trim()) {
-      return res.status(400).json({ error: 'Project description is required' });
-    }
 
     // Validate URL if provided
     if (project_url && !validateUrl(project_url)) {
@@ -72,9 +66,9 @@ router.post('/:roomId/participants', (req: Request<RoomParams>, res: Response) =
         sanitizeHtml(name.trim()),
         sanitizeHtml(tagline?.trim()) || null,
         profile_image_path || null,
-        sanitizeHtml(project_name.trim()),
+        sanitizeHtml(project_name?.trim()) || null,
         project_url || null,
-        sanitizeHtml(project_description.trim()),
+        sanitizeHtml(project_description?.trim()) || null,
         presentation_media_path || null,
         media_type || null,
         sanitizeHtml(current_need?.trim()) || null
@@ -99,9 +93,9 @@ router.post('/:roomId/participants', (req: Request<RoomParams>, res: Response) =
         sanitizeHtml(name.trim()),
         sanitizeHtml(tagline?.trim()) || null,
         profile_image_path || null,
-        sanitizeHtml(project_name.trim()),
+        sanitizeHtml(project_name?.trim()) || null,
         project_url || null,
-        sanitizeHtml(project_description.trim()),
+        sanitizeHtml(project_description?.trim()) || null,
         presentation_media_path || null,
         media_type || null,
         sanitizeHtml(current_need?.trim()) || null,
@@ -117,9 +111,9 @@ router.post('/:roomId/participants', (req: Request<RoomParams>, res: Response) =
         sanitizeHtml(name.trim()),
         sanitizeHtml(tagline?.trim()) || null,
         profile_image_path || null,
-        sanitizeHtml(project_name.trim()),
+        sanitizeHtml(project_name?.trim()) || null,
         project_url || null,
-        sanitizeHtml(project_description.trim()),
+        sanitizeHtml(project_description?.trim()) || null,
         presentation_media_path || null,
         media_type || null,
         sanitizeHtml(current_need?.trim()) || null,
@@ -134,9 +128,9 @@ router.post('/:roomId/participants', (req: Request<RoomParams>, res: Response) =
         sanitizeHtml(name.trim()),
         sanitizeHtml(tagline?.trim()) || profile.tagline,
         profile_image_path || profile.profile_image_path,
-        sanitizeHtml(project_name.trim()),
+        sanitizeHtml(project_name?.trim()) || profile.project_name,
         project_url || profile.project_url,
-        sanitizeHtml(project_description.trim()),
+        sanitizeHtml(project_description?.trim()) || profile.project_description,
         presentation_media_path || profile.presentation_media_path,
         media_type || profile.media_type,
         sanitizeHtml(current_need?.trim()) || profile.current_need,

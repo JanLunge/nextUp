@@ -6,7 +6,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - nextup-data:/data
+      - ./data:/data
     environment:
       - NODE_ENV=production
       - PORT=3000
@@ -24,11 +24,6 @@ services:
       - traefik.http.routers.nextup.tls.certresolver=myresolver
     networks:
       - web
-
-volumes:
-  nextup-data:
-
-
 networks:
   web:
     external:
