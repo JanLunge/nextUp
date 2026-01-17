@@ -45,8 +45,8 @@ function handleWebSocketMessage(message: WSMessage): void {
     waveEmitter.value?.addWave();
   }
 
-  // Handle "you are next" notification
-  if (message.type === 'you_are_next' && message.profile_id === profileId.value) {
+  // Handle "you are next" notification (sent only to the specific user)
+  if (message.type === 'you_are_next') {
     showYouAreNext.value = true;
   }
 }
@@ -80,6 +80,11 @@ async function handleWave(participant: Participant): Promise<void> {
 // Check if waved at participant
 function hasWavedAt(participantId: number): boolean {
   return wavedParticipants.value.has(participantId);
+}
+
+// Check if participant is the current user
+function isCurrentUser(participant: Participant): boolean {
+  return profileId.value !== null && participant.profile_id === profileId.value;
 }
 
 // Navigate to submit form
@@ -161,6 +166,7 @@ onMounted(async () => {
         <CurrentPresenterCard
           :participant="currentParticipant"
           :has-waved="hasWavedAt(currentParticipant.id)"
+          :is-you="isCurrentUser(currentParticipant)"
           @wave="handleWave"
           @click="goToPresenter(currentParticipant)"
         />
@@ -186,6 +192,7 @@ onMounted(async () => {
         <ParticipantCard
           :participant="nextParticipant"
           :has-waved="hasWavedAt(nextParticipant.id)"
+          :is-you="isCurrentUser(nextParticipant)"
           @wave="handleWave"
           @click="goToPresenter(nextParticipant)"
         />
@@ -207,6 +214,7 @@ onMounted(async () => {
             :key="participant.id"
             :participant="participant"
             :has-waved="hasWavedAt(participant.id)"
+            :is-you="isCurrentUser(participant)"
             :compact="true"
             :class="['animate-fade-up', { 'delay-200': index < 3 }]"
             :style="{ animationDelay: `${150 + index * 50}ms` }"

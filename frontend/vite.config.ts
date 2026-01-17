@@ -21,6 +21,11 @@ export default defineConfig({
         target: 'http://localhost:4457',
         changeOrigin: true,
       },
+      // WebSocket proxy - matches all WebSocket upgrade requests
+      '/ws': {
+        target: 'ws://localhost:4457',
+        ws: true,
+      },
     },
   },
 })

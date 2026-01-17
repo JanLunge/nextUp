@@ -18,7 +18,7 @@ export class WebSocketManager implements WebSocketManagerInterface {
   private heartbeatInterval: NodeJS.Timeout;
 
   constructor(server: Server) {
-    this.wss = new WebSocketServer({ server });
+    this.wss = new WebSocketServer({ server, path: '/ws' });
     this.rooms = new Map();
     this.timers = new Map();
 

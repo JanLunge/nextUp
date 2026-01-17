@@ -6,9 +6,10 @@ function getWsUrl(): string {
   if (import.meta.env.VITE_WS_URL) {
     return import.meta.env.VITE_WS_URL;
   }
-  // In production, derive WebSocket URL from current page location
+  // Derive WebSocket URL from current page location
+  // Use /ws path which gets proxied in development
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  return `${protocol}//${window.location.host}`;
+  return `${protocol}//${window.location.host}/ws`;
 }
 
 const WS_BASE = getWsUrl();
