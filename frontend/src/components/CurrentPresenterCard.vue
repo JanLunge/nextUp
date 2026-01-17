@@ -8,11 +8,13 @@ interface Props {
   participant: Participant;
   hasWaved?: boolean;
   showWaveButton?: boolean;
+  isYou?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   hasWaved: false,
   showWaveButton: true,
+  isYou: false,
 });
 
 const emit = defineEmits<{
@@ -39,7 +41,10 @@ function handleClick(): void {
 
 <template>
   <div
-    class="card bg-surface-elevated border border-white/5 overflow-hidden cursor-pointer hover-lift"
+    :class="[
+      'card bg-surface-elevated border overflow-hidden cursor-pointer hover-lift',
+      isYou ? 'border-coral/50 ring-1 ring-coral/30' : 'border-white/5'
+    ]"
     @click="handleClick"
   >
     <div class="flex flex-col md:flex-row">
@@ -81,7 +86,10 @@ function handleClick(): void {
             </div>
           </div>
           <div class="min-w-0">
-            <h2 class="font-display text-xl font-bold text-cream truncate">{{ participant.name }}</h2>
+            <div class="flex items-center gap-2">
+              <h2 class="font-display text-xl font-bold text-cream truncate">{{ participant.name }}</h2>
+              <span v-if="isYou" class="px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-coral/20 text-coral rounded shrink-0">You</span>
+            </div>
             <p v-if="participant.tagline" class="text-subtle truncate">
               {{ participant.tagline }}
             </p>

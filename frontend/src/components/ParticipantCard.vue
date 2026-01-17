@@ -9,12 +9,14 @@ interface Props {
   hasWaved?: boolean;
   showWaveButton?: boolean;
   compact?: boolean;
+  isYou?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   hasWaved: false,
   showWaveButton: true,
   compact: false,
+  isYou: false,
 });
 
 const emit = defineEmits<{
@@ -33,13 +35,16 @@ function handleClick(): void {
 
 <template>
   <div
-    class="card bg-surface-elevated border border-white/5 cursor-pointer hover-lift"
+    :class="[
+      'card bg-surface-elevated border cursor-pointer hover-lift',
+      isYou ? 'border-coral/50 ring-1 ring-coral/30' : 'border-white/5'
+    ]"
     @click="handleClick"
   >
     <div :class="['p-4', compact ? 'py-3' : '']">
       <div class="flex items-start gap-4">
         <!-- Profile Image -->
-        <div class="shrink-0">
+        <div class="shrink-0 relative">
           <div
             :class="[
               'rounded-full overflow-hidden',
@@ -66,7 +71,10 @@ function handleClick(): void {
 
         <!-- Info -->
         <div class="flex-1 min-w-0">
-          <h3 class="font-display font-bold text-cream truncate">{{ participant.name }}</h3>
+          <div class="flex items-center gap-2">
+            <h3 class="font-display font-bold text-cream truncate">{{ participant.name }}</h3>
+            <span v-if="isYou" class="px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-coral/20 text-coral rounded">You</span>
+          </div>
           <p
             v-if="participant.tagline && !compact"
             class="text-sm text-subtle truncate"

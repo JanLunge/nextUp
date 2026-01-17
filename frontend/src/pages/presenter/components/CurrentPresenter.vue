@@ -35,7 +35,7 @@ const isVideo = computed(() => {
 });
 
 const joinUrl = computed(() => {
-  return `${window.location.origin}/room/${props.roomId}`;
+  return `${window.location.origin}/room/${props.roomId}/join`;
 });
 </script>
 

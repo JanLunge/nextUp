@@ -25,7 +25,8 @@ async function fetchParticipant(): Promise<void> {
   error.value = null;
 
   try {
-    participant.value = await api.getParticipant(roomId.value, participantId.value);
+    const response = await api.getParticipant(roomId.value, participantId.value);
+    participant.value = response.participant;
   } catch (e) {
     error.value = e instanceof Error ? e.message : 'Failed to load presenter';
   } finally {
