@@ -2,7 +2,16 @@ import { ref, onUnmounted, type Ref, type ComputedRef } from 'vue';
 import { useWebSocket as useVueWebSocket } from '@vueuse/core';
 import type { WSMessage } from '@/types';
 
-const WS_BASE = import.meta.env.VITE_WS_URL || 'ws://localhost:4457';
+function getWsUrl(): string {
+  if (import.meta.env.VITE_WS_URL) {
+    return import.meta.env.VITE_WS_URL;
+  }
+  // In production, derive WebSocket URL from current page location
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  return `${protocol}//${window.location.host}`;
+}
+
+const WS_BASE = getWsUrl();
 
 export type WebSocketRole = 'presenter' | 'participant' | 'timer' | 'admin';
 

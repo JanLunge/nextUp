@@ -1,0 +1,17 @@
+services:
+  nextup:
+    build: .
+    container_name: nextup
+    restart: unless-stopped
+    ports:
+      - "3901:3000"
+    volumes:
+      - nextup-data:/data
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_PATH=/data/queue.db
+      - UPLOAD_PATH=/data/uploads
+
+volumes:
+  nextup-data:

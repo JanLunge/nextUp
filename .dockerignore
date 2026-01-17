@@ -1,0 +1,46 @@
+# Dependencies
+node_modules
+*/node_modules
+
+# Build outputs (will be built in Docker)
+frontend/dist
+backend/dist
+
+# Development files
+.git
+.gitignore
+*.md
+!README.md
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Data and uploads (mounted as volume)
+backend/data
+backend/tmp
+*.db
+*.db-wal
+*.db-shm
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test files
+**/*.test.*
+**/*.spec.*
+__tests__
+coverage
+
+# Docker files (not needed in build context recursively)
+Dockerfile
+docker-compose*.yml
+.dockerignore
