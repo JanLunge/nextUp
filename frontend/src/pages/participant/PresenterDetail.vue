@@ -69,7 +69,12 @@ onMounted(() => {
         <div class="flex items-center gap-4">
           <button class="btn btn-ghost btn-sm btn-square" @click="goBack">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
           </button>
           <h1 class="font-display font-bold text-cream">Presenter</h1>
@@ -80,7 +85,9 @@ onMounted(() => {
     <!-- Loading -->
     <div v-if="loading" class="flex items-center justify-center min-h-[60vh]">
       <div class="text-center">
-        <div class="w-12 h-12 mx-auto mb-4 rounded-full border-2 border-coral border-t-transparent animate-spin"></div>
+        <div
+          class="w-12 h-12 mx-auto mb-4 rounded-full border-2 border-coral border-t-transparent animate-spin"
+        ></div>
         <p class="text-subtle">Loading...</p>
       </div>
     </div>
@@ -118,7 +125,10 @@ onMounted(() => {
         </div>
 
         <!-- Media Preview -->
-        <div v-if="getMediaUrl(participant.presentation_media_path)" class="animate-fade-up delay-150">
+        <div
+          v-if="getMediaUrl(participant.presentation_media_path)"
+          class="animate-fade-up delay-150"
+        >
           <div class="rounded-xl overflow-hidden bg-surface-elevated border border-white/5">
             <video
               v-if="participant.media_type === 'video'"
@@ -139,7 +149,9 @@ onMounted(() => {
         <div class="card bg-surface-elevated border border-white/5 animate-fade-up delay-200">
           <div class="p-5 space-y-4">
             <div>
-              <h2 class="font-display text-xl font-bold text-coral">{{ participant.project_name }}</h2>
+              <h2 class="font-display text-xl font-bold text-coral">
+                {{ participant.project_name }}
+              </h2>
               <a
                 v-if="participant.project_url"
                 :href="participant.project_url"
@@ -148,7 +160,12 @@ onMounted(() => {
                 class="inline-flex items-center gap-1 text-sm text-subtle hover:text-cream transition-colors mt-1"
               >
                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  />
                 </svg>
                 {{ participant.project_url }}
               </a>
@@ -161,7 +178,9 @@ onMounted(() => {
               v-if="participant.current_need"
               class="p-4 bg-coral/10 border border-coral/20 rounded-xl"
             >
-              <p class="text-xs text-coral uppercase tracking-wider font-medium mb-1">Looking For</p>
+              <p class="text-xs text-coral uppercase tracking-wider font-medium mb-1">
+                Looking For
+              </p>
               <p class="text-cream">{{ participant.current_need }}</p>
             </div>
           </div>
@@ -177,7 +196,11 @@ onMounted(() => {
             @wave="sendWave"
           />
           <p class="text-xs text-subtle text-center mt-3">
-            {{ hasWaved ? 'They\'ll see your wave after their presentation!' : 'Let them know you\'re interested in connecting' }}
+            {{
+              hasWaved
+                ? "They'll see your wave after their presentation!"
+                : "Let them know you're interested in connecting"
+            }}
           </p>
         </div>
       </div>

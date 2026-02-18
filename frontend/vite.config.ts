@@ -1,6 +1,6 @@
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
-import { resolve } from 'path'
+import vue from '@vitejs/plugin-vue';
+import { resolve } from 'path';
+import { defineConfig } from 'vite';
 
 export default defineConfig({
   plugins: [vue()],
@@ -14,18 +14,19 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:4457',
+        target: 'http://127.0.0.1:4457',
         changeOrigin: true,
       },
       '/uploads': {
-        target: 'http://localhost:4457',
+        target: 'http://127.0.0.1:4457',
         changeOrigin: true,
       },
       // WebSocket proxy - matches all WebSocket upgrade requests
       '/ws': {
-        target: 'ws://localhost:4457',
+        target: 'http://127.0.0.1:4457',
         ws: true,
+        changeOrigin: true,
       },
     },
   },
-})
+});

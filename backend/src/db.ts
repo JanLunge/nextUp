@@ -1,19 +1,26 @@
-import Database, { type Statement, type Database as DatabaseType } from 'better-sqlite3';
+import Database, { type Database as DatabaseType, type Statement } from 'better-sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import type {
-  RoomRow,
-  ProfileRow,
+  CountResult,
+  NextPositionResult,
   ParticipantRow,
+  ProfileRow,
+  RoomRow,
   WaveRow,
   WaveWithParticipantInfo,
   WaveWithProfileInfo,
-  CountResult,
-  NextPositionResult
 } from './types/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dbPath = process.env.DATABASE_PATH || path.join(__dirname, '../data/queue.db');
+
+// Ensure database directory exists
+import fs from 'fs';
+const dbDir = path.dirname(dbPath);
+if (!fs.existsSync(dbDir)) {
+  fs.mkdirSync(dbDir, { recursive: true });
+}
 
 const db: DatabaseType = new Database(dbPath);
 db.pragma('journal_mode = WAL');
@@ -117,7 +124,7 @@ export const roomQueries = {
 
   validateAdminKey: db.prepare(`
     SELECT id FROM rooms WHERE id = ? AND admin_key = ?
-  `) as Statement<[string, string], { id: string } | undefined>
+  `) as Statement<[string, string], { id: string } | undefined>,
 };
 
 // Profile queries
@@ -142,7 +149,7 @@ export const profileQueries = {
       presentation_media_path = ?, media_type = ?, current_need = ?,
       updated_at = CURRENT_TIMESTAMP
     WHERE id = ?
-  `) as Statement
+  `) as Statement,
 };
 
 // Participant queries
@@ -212,7 +219,7 @@ export const participantQueries = {
       presentation_media_path = ?, media_type = ?, current_need = ?,
       queue_position = ?, status = 'queued', updated_at = CURRENT_TIMESTAMP
     WHERE id = ?
-  `) as Statement
+  `) as Statement,
 };
 
 // Wave queries
@@ -254,7 +261,7 @@ export const waveQueries = {
     JOIN participants p2 ON p2.profile_id = w1.from_profile_id AND p2.room_id = w1.room_id
     JOIN waves w2 ON w2.from_profile_id = p1.profile_id AND w2.to_participant_id = p2.id
     WHERE w1.room_id = ? AND w1.from_profile_id = ? AND w1.to_participant_id = ?
-  `) as Statement<[string, number, number], { id: number }>
+  `) as Statement<[string, number, number], { id: number }>,
 };
 
 export default db;

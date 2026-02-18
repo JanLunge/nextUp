@@ -1,15 +1,15 @@
-import 'dotenv/config';
-import express, { type Request, type Response, type NextFunction } from 'express';
 import cors from 'cors';
+import 'dotenv/config';
+import express, { type NextFunction, type Request, type Response } from 'express';
+import { createServer } from 'http';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { createServer } from 'http';
 
-import roomsRouter from './routes/rooms.js';
-import profilesRouter from './routes/profiles.js';
 import participantsRouter from './routes/participants.js';
-import wavesRouter from './routes/waves.js';
+import profilesRouter from './routes/profiles.js';
+import roomsRouter from './routes/rooms.js';
 import uploadRouter from './routes/upload.js';
+import wavesRouter from './routes/waves.js';
 import { WebSocketManager } from './websocket/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -18,15 +18,21 @@ const app = express();
 const httpServer = createServer(app);
 
 // Middleware
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Serve uploaded files
+import fs from 'fs';
 const uploadPath = process.env.UPLOAD_PATH || path.join(__dirname, '../tmp/uploads');
+if (!fs.existsSync(uploadPath)) {
+  fs.mkdirSync(uploadPath, { recursive: true });
+}
 app.use('/uploads', express.static(uploadPath));
 
 // Initialize WebSocket manager
@@ -34,10 +40,11 @@ const wsManager = new WebSocketManager(httpServer);
 app.set('wsManager', wsManager);
 
 // API routes
+roomsRouter.use('/', participantsRouter);
+roomsRouter.use('/', wavesRouter);
+
 app.use('/api/rooms', roomsRouter);
 app.use('/api/profiles', profilesRouter);
-app.use('/api/rooms', participantsRouter);
-app.use('/api/rooms', wavesRouter);
 app.use('/api/upload', uploadRouter);
 
 // Health check
@@ -53,7 +60,7 @@ interface ErrorWithStatus extends Error {
 app.use((err: ErrorWithStatus, _req: Request, res: Response, _next: NextFunction) => {
   console.error('Error:', err);
   res.status(err.status || 500).json({
-    error: err.message || 'Internal server error'
+    error: err.message || 'Internal server error',
   });
 });
 
@@ -76,8 +83,8 @@ if (process.env.NODE_ENV === 'production') {
 const PORT = process.env.PORT || 3000;
 
 httpServer.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-  console.log(`WebSocket server running on ws://localhost:${PORT}/ws`);
+  console.log(`Server running on port ${PORT}`);
+  console.log(`WebSocket server active at /ws`);
 });
 
 // Graceful shutdown

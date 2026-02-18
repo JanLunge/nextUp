@@ -1,4 +1,9 @@
-import type { ParticipantRow, ProfileRow, FormattedParticipant, FormattedProfile } from './types/index.js';
+import type {
+  ParticipantRow,
+  ProfileRow,
+  FormattedParticipant,
+  FormattedProfile,
+} from './types/index.js';
 
 // Utility functions
 
@@ -28,7 +33,9 @@ export function getMediaType(mimetype: string): 'image' | 'video' | null {
   return null;
 }
 
-export function formatParticipant(participant: ParticipantRow | undefined | null): FormattedParticipant | null {
+export function formatParticipant(
+  participant: ParticipantRow | undefined | null
+): FormattedParticipant | null {
   if (!participant) return null;
   return {
     id: participant.id,
@@ -45,7 +52,7 @@ export function formatParticipant(participant: ParticipantRow | undefined | null
     current_need: participant.current_need,
     queue_position: participant.queue_position,
     status: participant.status,
-    created_at: participant.created_at
+    created_at: participant.created_at,
   };
 }
 
@@ -61,6 +68,6 @@ export function formatProfile(profile: ProfileRow | undefined | null): Formatted
     project_description: profile.project_description,
     presentation_media_path: profile.presentation_media_path,
     media_type: profile.media_type,
-    current_need: profile.current_need
+    current_need: profile.current_need,
   };
 }

@@ -1,5 +1,12 @@
 import { ref, computed, type Ref, type ComputedRef } from 'vue';
-import type { TimerPhase, WSMessage, WSTimerStartMessage, WSTimerTickMessage, WSTimerOvertimeMessage, WSTimerSyncMessage } from '@/types';
+import type {
+  TimerPhase,
+  WSMessage,
+  WSTimerStartMessage,
+  WSTimerTickMessage,
+  WSTimerOvertimeMessage,
+  WSTimerSyncMessage,
+} from '@/types';
 
 export interface UseTimerReturn {
   duration: Ref<number>;

@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
 import { api } from '@/api/client';
-import { useWebSocket } from '@/composables/useWebSocket';
-import { usePassphrase } from '@/composables/usePassphrase';
-import { useRoom } from '@/composables/useRoom';
 import CurrentPresenterCard from '@/components/CurrentPresenterCard.vue';
 import ParticipantCard from '@/components/ParticipantCard.vue';
-import YouAreNextModal from '@/components/YouAreNextModal.vue';
 import WaveEmitter from '@/components/WaveEmitter.vue';
-import type { WSMessage, Participant } from '@/types';
+import YouAreNextModal from '@/components/YouAreNextModal.vue';
+import { usePassphrase } from '@/composables/usePassphrase';
+import { useRoom } from '@/composables/useRoom';
+import { useWebSocket } from '@/composables/useWebSocket';
+import type { Participant, WSMessage } from '@/types';
+import { computed, onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 interface WaveEmitterExpose {
   addWave: () => void;
@@ -23,7 +23,15 @@ const { passphrase } = usePassphrase();
 const waveEmitter = ref<WaveEmitterExpose | null>(null);
 
 // Room state
-const { room, currentParticipant, nextParticipant, queue, fetchRoom, fetchQueue, updateFromWebSocket } = useRoom(roomId);
+const {
+  room: _room,
+  currentParticipant,
+  nextParticipant,
+  queue,
+  fetchRoom,
+  fetchQueue,
+  updateFromWebSocket,
+} = useRoom(roomId);
 
 // Presented participants
 const presentedParticipants = ref<Participant[]>([]);
@@ -35,7 +43,7 @@ const profileId = ref<number | null>(null);
 
 // WebSocket
 const { isConnected, connect } = useWebSocket(roomId, {
-  role: 'audience',
+  role: 'participant',
   passphrase: passphrase.value ?? undefined,
   onMessage: handleWebSocketMessage,
 });
@@ -76,7 +84,7 @@ async function fetchProfile(): Promise<void> {
   try {
     const result = await api.checkPassphraseInRoom(roomId.value, passphrase.value);
     if (result.profile_exists) {
-      profileId.value = result.profile_id ?? null;
+      profileId.value = result.profile?.id ?? null;
     }
   } catch (e) {
     console.error('Failed to fetch profile:', e);
@@ -124,7 +132,7 @@ function goToWaves(): void {
 function goToPresenter(participant: Participant): void {
   router.push({
     name: 'presenterDetail',
-    params: { roomId: roomId.value, participantId: participant.id }
+    params: { roomId: roomId.value, participantId: participant.id },
   });
 }
 
@@ -153,20 +161,14 @@ onMounted(async () => {
             <span class="room-code text-lg text-coral">{{ roomId }}</span>
             <div class="flex items-center gap-1.5">
               <span
-                :class="[
-                  'status-dot',
-                  isConnected ? 'status-dot-live' : 'status-dot-offline'
-                ]"
+                :class="['status-dot', isConnected ? 'status-dot-live' : 'status-dot-offline']"
               ></span>
               <span :class="['text-xs', isConnected ? 'text-success' : 'text-error']">
                 {{ isConnected ? 'Live' : 'Offline' }}
               </span>
             </div>
           </div>
-          <button
-            class="btn btn-ghost btn-sm gap-2"
-            @click="goToWaves"
-          >
+          <button class="btn btn-ghost btn-sm gap-2" @click="goToWaves">
             <span class="text-lg">👋</span>
             <span>Waves</span>
           </button>
@@ -177,7 +179,10 @@ onMounted(async () => {
     <!-- Main Content -->
     <main class="px-4 py-6 space-y-6">
       <!-- Current Presenter - Special highlight if it's the current user -->
-      <section v-if="currentParticipant && isCurrentUser(currentParticipant)" class="animate-fade-up">
+      <section
+        v-if="currentParticipant && isCurrentUser(currentParticipant)"
+        class="animate-fade-up"
+      >
         <div class="card bg-coral/20 border-2 border-coral overflow-hidden next-pulse">
           <div class="p-5">
             <div class="flex items-center gap-3 mb-4">
@@ -191,7 +196,8 @@ onMounted(async () => {
             </div>
             <div class="p-3 bg-surface/50 rounded-xl">
               <p class="text-cream">
-                <span class="font-medium">Your project:</span> {{ currentParticipant.project_name || 'Untitled' }}
+                <span class="font-medium">Your project:</span>
+                {{ currentParticipant.project_name || 'Untitled' }}
               </p>
             </div>
           </div>
@@ -202,7 +208,9 @@ onMounted(async () => {
       <section v-else-if="currentParticipant" class="animate-fade-up">
         <div class="flex items-center gap-2 mb-3">
           <div class="w-2 h-2 rounded-full bg-coral animate-pulse"></div>
-          <h2 class="font-display text-sm font-bold text-subtle uppercase tracking-wider">Now Presenting</h2>
+          <h2 class="font-display text-sm font-bold text-subtle uppercase tracking-wider">
+            Now Presenting
+          </h2>
         </div>
         <CurrentPresenterCard
           :participant="currentParticipant"
@@ -214,12 +222,27 @@ onMounted(async () => {
       </section>
 
       <!-- Empty State for No Presenter -->
-      <div v-else-if="!nextParticipant && queue.length === 0 && presentedParticipants.length === 0" class="animate-fade-up">
+      <div
+        v-else-if="!nextParticipant && queue.length === 0 && presentedParticipants.length === 0"
+        class="animate-fade-up"
+      >
         <div class="card bg-surface-elevated border border-white/5">
           <div class="p-8 text-center">
-            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-coral/10 flex items-center justify-center">
-              <svg class="w-8 h-8 text-coral/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            <div
+              class="w-16 h-16 mx-auto mb-4 rounded-full bg-coral/10 flex items-center justify-center"
+            >
+              <svg
+                class="w-8 h-8 text-coral/50"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.5"
+                  d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                />
               </svg>
             </div>
             <p class="text-subtle">Waiting for first presenter...</p>
@@ -228,22 +251,45 @@ onMounted(async () => {
       </div>
 
       <!-- All Done State -->
-      <div v-else-if="!nextParticipant && queue.length === 0 && presentedParticipants.length > 0" class="animate-fade-up">
+      <div
+        v-else-if="!nextParticipant && queue.length === 0 && presentedParticipants.length > 0"
+        class="animate-fade-up"
+      >
         <div class="card bg-success/10 border border-success/30">
           <div class="p-8 text-center">
-            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-success/20 flex items-center justify-center">
-              <svg class="w-8 h-8 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            <div
+              class="w-16 h-16 mx-auto mb-4 rounded-full bg-success/20 flex items-center justify-center"
+            >
+              <svg
+                class="w-8 h-8 text-success"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M5 13l4 4L19 7"
+                />
               </svg>
             </div>
-            <p class="font-display text-lg font-bold text-cream mb-2">All presentations complete!</p>
-            <p class="text-subtle text-sm">{{ presentedParticipants.length }} {{ presentedParticipants.length === 1 ? 'person' : 'people' }} presented today.</p>
+            <p class="font-display text-lg font-bold text-cream mb-2">
+              All presentations complete!
+            </p>
+            <p class="text-subtle text-sm">
+              {{ presentedParticipants.length }}
+              {{ presentedParticipants.length === 1 ? 'person' : 'people' }} presented today.
+            </p>
           </div>
         </div>
       </div>
 
       <!-- Up Next - Special highlight if it's the current user -->
-      <section v-if="nextParticipant && isCurrentUser(nextParticipant)" class="animate-fade-up delay-150">
+      <section
+        v-if="nextParticipant && isCurrentUser(nextParticipant)"
+        class="animate-fade-up delay-150"
+      >
         <div class="card bg-coral/10 border-2 border-coral/50 overflow-hidden">
           <div class="p-4">
             <div class="flex items-center gap-3 mb-3">
@@ -257,7 +303,8 @@ onMounted(async () => {
             </div>
             <div class="p-3 bg-surface/50 rounded-xl">
               <p class="text-sm text-cream">
-                <span class="font-medium">Your project:</span> {{ nextParticipant.project_name || 'Untitled' }}
+                <span class="font-medium">Your project:</span>
+                {{ nextParticipant.project_name || 'Untitled' }}
               </p>
             </div>
           </div>
@@ -267,7 +314,9 @@ onMounted(async () => {
       <!-- Up Next - Regular view for other users -->
       <section v-else-if="nextParticipant" class="animate-fade-up delay-150">
         <div class="flex items-center gap-2 mb-3">
-          <h2 class="font-display text-sm font-bold text-subtle uppercase tracking-wider">Up Next</h2>
+          <h2 class="font-display text-sm font-bold text-subtle uppercase tracking-wider">
+            Up Next
+          </h2>
           <span class="text-xs text-subtle">(after current presenter)</span>
         </div>
         <ParticipantCard
@@ -306,16 +355,28 @@ onMounted(async () => {
       </section>
 
       <!-- Empty Queue State (only when no one has presented yet) -->
-      <section v-else-if="!currentParticipant && !nextParticipant && presentedParticipants.length === 0" class="animate-fade-up delay-200">
+      <section
+        v-else-if="!currentParticipant && !nextParticipant && presentedParticipants.length === 0"
+        class="animate-fade-up delay-200"
+      >
         <div class="card bg-surface-elevated border border-white/5 border-dashed">
           <div class="p-8 text-center">
-            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-coral/10 flex items-center justify-center">
+            <div
+              class="w-16 h-16 mx-auto mb-4 rounded-full bg-coral/10 flex items-center justify-center"
+            >
               <svg class="w-8 h-8 text-coral" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                />
               </svg>
             </div>
             <p class="font-display text-lg font-bold text-cream mb-2">Be the first to present!</p>
-            <p class="text-subtle text-sm">The stage is empty. Submit your project to get started.</p>
+            <p class="text-subtle text-sm">
+              The stage is empty. Submit your project to get started.
+            </p>
           </div>
         </div>
       </section>
@@ -351,12 +412,14 @@ onMounted(async () => {
     <nav class="fixed bottom-0 left-0 right-0 glass-dark border-t border-white/5 pb-safe z-20">
       <div class="px-4 py-3">
         <div class="flex gap-3">
-          <button
-            class="btn btn-primary flex-1 font-display font-bold"
-            @click="goToSubmit"
-          >
+          <button class="btn btn-primary flex-1 font-display font-bold" @click="goToSubmit">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+              />
             </svg>
             Submit to Present
           </button>
@@ -365,7 +428,12 @@ onMounted(async () => {
             @click="goToMySubmission"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
             </svg>
           </button>
         </div>

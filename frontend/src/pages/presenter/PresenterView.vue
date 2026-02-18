@@ -23,7 +23,8 @@ const adminKey = computed(() => (route.query.key as string) || null);
 const waveEmitter = ref<WaveEmitterExpose | null>(null);
 
 // Room state
-const { currentParticipant, nextParticipant, queueCount, fetchRoom, updateFromWebSocket } = useRoom(roomId);
+const { currentParticipant, nextParticipant, queueCount, fetchRoom, updateFromWebSocket } =
+  useRoom(roomId);
 
 // Timer state
 const timer = useTimer();
@@ -85,8 +86,12 @@ onMounted(async () => {
   <div class="h-screen bg-surface presenter-display flex flex-col relative overflow-hidden">
     <!-- Background ambient -->
     <div class="absolute inset-0 pointer-events-none">
-      <div class="absolute top-0 left-1/4 w-[600px] h-[300px] bg-coral/5 rounded-full blur-[100px]"></div>
-      <div class="absolute bottom-0 right-1/4 w-[400px] h-[200px] bg-coral/3 rounded-full blur-[80px]"></div>
+      <div
+        class="absolute top-0 left-1/4 w-[600px] h-[300px] bg-coral/5 rounded-full blur-[100px]"
+      ></div>
+      <div
+        class="absolute bottom-0 right-1/4 w-[400px] h-[200px] bg-coral/3 rounded-full blur-[80px]"
+      ></div>
     </div>
 
     <!-- Wave Emitter -->
@@ -100,10 +105,7 @@ onMounted(async () => {
           <span class="room-code text-2xl text-coral">{{ roomId }}</span>
           <div class="flex items-center gap-2">
             <span
-              :class="[
-                'status-dot',
-                isConnected ? 'status-dot-live' : 'status-dot-offline'
-              ]"
+              :class="['status-dot', isConnected ? 'status-dot-live' : 'status-dot-offline']"
             ></span>
             <span :class="['text-sm font-medium', isConnected ? 'text-success' : 'text-error']">
               {{ isConnected ? 'Live' : 'Offline' }}

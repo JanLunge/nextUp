@@ -19,7 +19,7 @@ function addWave(): void {
 
   // Remove after animation
   setTimeout(() => {
-    waves.value = waves.value.filter(w => w.id !== id);
+    waves.value = waves.value.filter((w) => w.id !== id);
   }, 2000);
 }
 

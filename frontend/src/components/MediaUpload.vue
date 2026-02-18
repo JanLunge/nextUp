@@ -88,7 +88,7 @@ function clearUpload(): void {
       <div
         :class="[
           'rounded-xl overflow-hidden bg-surface-overlay border border-white/10',
-          type === 'profile' ? 'w-24 h-24' : 'w-full aspect-video'
+          type === 'profile' ? 'w-24 h-24' : 'w-full aspect-video',
         ]"
       >
         <video
@@ -98,12 +98,7 @@ function clearUpload(): void {
           muted
           playsinline
         ></video>
-        <img
-          v-else
-          :src="previewUrl"
-          alt="Preview"
-          class="w-full h-full object-cover"
-        />
+        <img v-else :src="previewUrl" alt="Preview" class="w-full h-full object-cover" />
       </div>
       <!-- Remove button -->
       <button
@@ -112,7 +107,12 @@ function clearUpload(): void {
         @click="clearUpload"
       >
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
         </svg>
       </button>
     </div>
@@ -123,7 +123,7 @@ function clearUpload(): void {
       type="button"
       :class="[
         'border-2 border-dashed border-white/20 rounded-xl flex items-center justify-center gap-3 text-subtle hover:border-coral/50 hover:text-coral transition-all',
-        type === 'profile' ? 'w-24 h-24' : 'w-full py-8'
+        type === 'profile' ? 'w-24 h-24' : 'w-full py-8',
       ]"
       :disabled="loading"
       @click="triggerUpload"
@@ -131,7 +131,12 @@ function clearUpload(): void {
       <span v-if="loading" class="loading loading-spinner loading-sm"></span>
       <template v-else>
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+          />
         </svg>
         <span v-if="type !== 'profile'" class="text-sm font-medium">{{ label }}</span>
       </template>

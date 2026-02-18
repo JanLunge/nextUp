@@ -51,7 +51,7 @@ onMounted(() => {
   <div
     :class="[
       'min-h-screen flex flex-col items-center justify-center p-8 transition-colors duration-500 relative overflow-hidden',
-      bgClass
+      bgClass,
     ]"
   >
     <!-- Wave Emitter -->
@@ -81,10 +81,7 @@ onMounted(() => {
     <div class="absolute top-6 right-6 z-20">
       <div class="flex items-center gap-2 px-4 py-2 rounded-full glass-dark">
         <span
-          :class="[
-            'status-dot',
-            isConnected ? 'status-dot-live' : 'status-dot-offline'
-          ]"
+          :class="['status-dot', isConnected ? 'status-dot-live' : 'status-dot-offline']"
         ></span>
         <span :class="['text-sm font-medium', isConnected ? 'text-success' : 'text-error']">
           {{ isConnected ? 'Connected' : 'Disconnected' }}
@@ -102,13 +99,14 @@ onMounted(() => {
     <!-- Main Timer Content -->
     <div class="relative z-10 text-center">
       <!-- Overtime Label -->
-      <div
-        v-if="timer.isOvertime.value"
-        class="mb-6 animate-fade-up"
-      >
-        <div class="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-error/20 border border-error/30">
+      <div v-if="timer.isOvertime.value" class="mb-6 animate-fade-up">
+        <div
+          class="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-error/20 border border-error/30"
+        >
           <span class="w-3 h-3 rounded-full bg-error animate-pulse"></span>
-          <span class="font-display text-2xl font-bold text-error uppercase tracking-wider">Overtime</span>
+          <span class="font-display text-2xl font-bold text-error uppercase tracking-wider"
+            >Overtime</span
+          >
         </div>
       </div>
 
@@ -117,7 +115,7 @@ onMounted(() => {
         :class="[
           'font-mono font-bold tabular-nums leading-none transition-all duration-300',
           timer.timerClass.value,
-          timer.isOvertime.value ? 'text-[12rem] md:text-[16rem]' : 'text-[14rem] md:text-[20rem]'
+          timer.isOvertime.value ? 'text-[12rem] md:text-[16rem]' : 'text-[14rem] md:text-[20rem]',
         ]"
       >
         {{ timer.displayTime.value }}
@@ -132,10 +130,13 @@ onMounted(() => {
             <div
               :class="[
                 'h-full rounded-full transition-all duration-300',
-                timer.isOvertime.value ? 'bg-error' :
-                timer.remaining.value <= 10 ? 'bg-error' :
-                timer.remaining.value <= 20 ? 'bg-warning' :
-                'bg-success'
+                timer.isOvertime.value
+                  ? 'bg-error'
+                  : timer.remaining.value <= 10
+                    ? 'bg-error'
+                    : timer.remaining.value <= 20
+                      ? 'bg-warning'
+                      : 'bg-success',
               ]"
               :style="{ width: `${timer.progress.value}%` }"
             ></div>
@@ -145,10 +146,13 @@ onMounted(() => {
             v-if="timer.isRunning.value"
             :class="[
               'absolute inset-0 rounded-full blur-md opacity-50',
-              timer.isOvertime.value ? 'bg-error' :
-              timer.remaining.value <= 10 ? 'bg-error' :
-              timer.remaining.value <= 20 ? 'bg-warning' :
-              'bg-success'
+              timer.isOvertime.value
+                ? 'bg-error'
+                : timer.remaining.value <= 10
+                  ? 'bg-error'
+                  : timer.remaining.value <= 20
+                    ? 'bg-warning'
+                    : 'bg-success',
             ]"
             :style="{ width: `${timer.progress.value}%` }"
           ></div>
@@ -160,12 +164,8 @@ onMounted(() => {
         <template v-if="!timer.isRunning.value && timer.remaining.value === timer.duration.value">
           Waiting to start...
         </template>
-        <template v-else-if="timer.isOvertime.value">
-          Time's up!
-        </template>
-        <template v-else>
-          {{ timer.remaining.value }} seconds remaining
-        </template>
+        <template v-else-if="timer.isOvertime.value"> Time's up! </template>
+        <template v-else> {{ timer.remaining.value }} seconds remaining </template>
       </p>
     </div>
 
@@ -184,6 +184,10 @@ onMounted(() => {
 
 <style scoped>
 .bg-gradient-radial {
-  background: radial-gradient(ellipse at center, var(--tw-gradient-from) 0%, var(--tw-gradient-to) 70%);
+  background: radial-gradient(
+    ellipse at center,
+    var(--tw-gradient-from) 0%,
+    var(--tw-gradient-to) 70%
+  );
 }
 </style>

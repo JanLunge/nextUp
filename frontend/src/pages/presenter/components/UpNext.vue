@@ -27,7 +27,12 @@ const profileImageUrl = computed(() => {
       <!-- Up Next Label -->
       <div class="flex items-center gap-2">
         <svg class="w-5 h-5 text-coral" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M13 5l7 7-7 7M5 5l7 7-7 7"
+          />
         </svg>
         <span class="text-sm font-medium text-subtle uppercase tracking-wider">Up Next</span>
       </div>
@@ -70,14 +75,19 @@ const profileImageUrl = computed(() => {
     <!-- Keyboard Hint -->
     <div class="flex items-center gap-6">
       <div v-if="!timerRunning && participant" class="flex items-center gap-3 text-subtle">
-        <kbd class="px-3 py-1.5 rounded-lg bg-surface-overlay border border-white/10 text-sm font-mono">
+        <kbd
+          class="px-3 py-1.5 rounded-lg bg-surface-overlay border border-white/10 text-sm font-mono"
+        >
           SPACE
         </kbd>
         <span class="text-sm">to start timer</span>
       </div>
 
       <!-- Queue indicator -->
-      <div v-if="queueCount > 1" class="flex items-center gap-2 px-4 py-2 rounded-full bg-surface-overlay border border-white/5">
+      <div
+        v-if="queueCount > 1"
+        class="flex items-center gap-2 px-4 py-2 rounded-full bg-surface-overlay border border-white/5"
+      >
         <span class="text-coral font-display font-bold">+{{ queueCount - 1 }}</span>
         <span class="text-sm text-subtle">more in queue</span>
       </div>

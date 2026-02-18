@@ -24,7 +24,7 @@ router.post('/:roomId/participants', (req: Request<RoomParams>, res: Response) =
       current_need,
       profile_image_path,
       presentation_media_path,
-      media_type
+      media_type,
     } = req.body;
 
     // Validate required fields
@@ -144,7 +144,7 @@ router.post('/:roomId/participants', (req: Request<RoomParams>, res: Response) =
       wsManager.broadcastToRoom(room.id, {
         type: 'participant_joined',
         participant: formatParticipant(participant),
-        queue_count: participantQueries.getQueueCount.get(room.id)?.count ?? 0
+        queue_count: participantQueries.getQueueCount.get(room.id)?.count ?? 0,
       });
     }
 
@@ -152,7 +152,7 @@ router.post('/:roomId/participants', (req: Request<RoomParams>, res: Response) =
       id: participant?.id,
       passphrase: profile.passphrase,
       queue_position: next_position,
-      is_new_profile: isNewProfile
+      is_new_profile: isNewProfile,
     });
   } catch (error) {
     console.error('Error submitting to queue:', error);
@@ -175,7 +175,7 @@ router.get('/:roomId/participants', (req: Request<RoomParams>, res: Response) =>
     res.json({
       participants,
       queue_count: participantQueries.getQueueCount.get(room.id)?.count ?? 0,
-      current_index: room.current_index
+      current_index: room.current_index,
     });
   } catch (error) {
     console.error('Error getting participants:', error);
@@ -191,12 +191,11 @@ router.get('/:roomId/participants/presented', (req: Request<RoomParams>, res: Re
       return res.status(404).json({ error: 'Room not found' });
     }
 
-    const participants = participantQueries.getPresentedByRoom.all(room.id)
-      .map(formatParticipant);
+    const participants = participantQueries.getPresentedByRoom.all(room.id).map(formatParticipant);
 
     res.json({
       participants,
-      count: participants.length
+      count: participants.length,
     });
   } catch (error) {
     console.error('Error getting presented participants:', error);
@@ -228,12 +227,13 @@ router.get('/:roomId/participants/me', (req: Request<RoomParams>, res: Response)
     }
 
     const queuedParticipants = participantQueries.getQueuedByRoom.all(room.id) as ParticipantRow[];
-    const position = queuedParticipants.findIndex((p: ParticipantRow) => p.id === participant.id) + 1;
+    const position =
+      queuedParticipants.findIndex((p: ParticipantRow) => p.id === participant.id) + 1;
 
     res.json({
       participant: formatParticipant(participant),
       queue_position: position > 0 ? position : null,
-      status: participant.status
+      status: participant.status,
     });
   } catch (error) {
     console.error('Error getting own submission:', error);
@@ -273,7 +273,7 @@ router.patch('/:roomId/participants/me', (req: Request<RoomParams>, res: Respons
       current_need,
       profile_image_path,
       presentation_media_path,
-      media_type
+      media_type,
     } = req.body;
 
     // Validate URL if provided
@@ -301,12 +301,12 @@ router.patch('/:roomId/participants/me', (req: Request<RoomParams>, res: Respons
     if (wsManager && updatedParticipant) {
       wsManager.broadcastToRoom(room.id, {
         type: 'participant_updated',
-        participant: formatParticipant(updatedParticipant)
+        participant: formatParticipant(updatedParticipant),
       });
     }
 
     res.json({
-      participant: formatParticipant(updatedParticipant)
+      participant: formatParticipant(updatedParticipant),
     });
   } catch (error) {
     console.error('Error updating submission:', error);
@@ -345,7 +345,7 @@ router.delete('/:roomId/participants/me', (req: Request<RoomParams>, res: Respon
       wsManager.broadcastToRoom(room.id, {
         type: 'participant_withdrawn',
         participantId: participant.id,
-        queue_count: participantQueries.getQueueCount.get(room.id)?.count ?? 0
+        queue_count: participantQueries.getQueueCount.get(room.id)?.count ?? 0,
       });
     }
 
@@ -357,23 +357,26 @@ router.delete('/:roomId/participants/me', (req: Request<RoomParams>, res: Respon
 });
 
 // Get single participant (for detail view)
-router.get('/:roomId/participants/:participantId', (req: Request<ParticipantParams>, res: Response) => {
-  try {
-    const roomId = req.params.roomId;
-    const participantId = parseInt(req.params.participantId, 10);
-    const participant = participantQueries.getById.get(participantId);
+router.get(
+  '/:roomId/participants/:participantId',
+  (req: Request<ParticipantParams>, res: Response) => {
+    try {
+      const roomId = req.params.roomId;
+      const participantId = parseInt(req.params.participantId, 10);
+      const participant = participantQueries.getById.get(participantId);
 
-    if (!participant || participant.room_id !== roomId) {
-      return res.status(404).json({ error: 'Participant not found' });
+      if (!participant || participant.room_id !== roomId) {
+        return res.status(404).json({ error: 'Participant not found' });
+      }
+
+      res.json({
+        participant: formatParticipant(participant),
+      });
+    } catch (error) {
+      console.error('Error getting participant:', error);
+      res.status(500).json({ error: 'Failed to get participant' });
     }
-
-    res.json({
-      participant: formatParticipant(participant)
-    });
-  } catch (error) {
-    console.error('Error getting participant:', error);
-    res.status(500).json({ error: 'Failed to get participant' });
   }
-});
+);
 
 export default router;

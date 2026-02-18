@@ -140,23 +140,45 @@ class ApiClient {
     return this.request<AdminValidationResponse>(`/api/rooms/${roomId}/admin?key=${key}`);
   }
 
-  async checkPassphraseInRoom(roomId: string, passphrase: string): Promise<PassphraseCheckResponse> {
-    return this.request<PassphraseCheckResponse>(`/api/rooms/${roomId}/check?passphrase=${passphrase}`);
+  async checkPassphraseInRoom(
+    roomId: string,
+    passphrase: string
+  ): Promise<PassphraseCheckResponse> {
+    return this.request<PassphraseCheckResponse>(
+      `/api/rooms/${roomId}/check?passphrase=${passphrase}`
+    );
   }
 
   // Navigation
-  async nextPresenter(roomId: string, adminKey?: string): Promise<{ current_index: number; current_participant: Participant | null; next_participant: Participant | null }> {
+  async nextPresenter(
+    roomId: string,
+    adminKey?: string
+  ): Promise<{
+    current_index: number;
+    current_participant: Participant | null;
+    next_participant: Participant | null;
+  }> {
     const params = adminKey ? `?admin_key=${adminKey}` : '';
     return this.request(`/api/rooms/${roomId}/next${params}`, { method: 'POST' });
   }
 
-  async previousPresenter(roomId: string, adminKey?: string): Promise<{ current_index: number; current_participant: Participant | null; next_participant: Participant | null }> {
+  async previousPresenter(
+    roomId: string,
+    adminKey?: string
+  ): Promise<{
+    current_index: number;
+    current_participant: Participant | null;
+    next_participant: Participant | null;
+  }> {
     const params = adminKey ? `?admin_key=${adminKey}` : '';
     return this.request(`/api/rooms/${roomId}/previous${params}`, { method: 'POST' });
   }
 
   // Timer
-  async startTimer(roomId: string, adminKey?: string): Promise<{ success: boolean; duration: number }> {
+  async startTimer(
+    roomId: string,
+    adminKey?: string
+  ): Promise<{ success: boolean; duration: number }> {
     const params = adminKey ? `?admin_key=${adminKey}` : '';
     return this.request(`/api/rooms/${roomId}/timer/start${params}`, { method: 'POST' });
   }
@@ -166,7 +188,10 @@ class ApiClient {
     return this.request(`/api/rooms/${roomId}/timer/stop${params}`, { method: 'POST' });
   }
 
-  async restartTimer(roomId: string, adminKey?: string): Promise<{ success: boolean; duration: number }> {
+  async restartTimer(
+    roomId: string,
+    adminKey?: string
+  ): Promise<{ success: boolean; duration: number }> {
     const params = adminKey ? `?admin_key=${adminKey}` : '';
     return this.request(`/api/rooms/${roomId}/timer/restart${params}`, { method: 'POST' });
   }
@@ -200,10 +225,16 @@ class ApiClient {
   }
 
   async getMySubmission(roomId: string, passphrase: string): Promise<MySubmissionResponse> {
-    return this.request<MySubmissionResponse>(`/api/rooms/${roomId}/participants/me?passphrase=${passphrase}`);
+    return this.request<MySubmissionResponse>(
+      `/api/rooms/${roomId}/participants/me?passphrase=${passphrase}`
+    );
   }
 
-  async updateMySubmission(roomId: string, passphrase: string, data: Partial<SubmissionData>): Promise<{ participant: Participant }> {
+  async updateMySubmission(
+    roomId: string,
+    passphrase: string,
+    data: Partial<SubmissionData>
+  ): Promise<{ participant: Participant }> {
     return this.request(`/api/rooms/${roomId}/participants/me?passphrase=${passphrase}`, {
       method: 'PATCH',
       body: JSON.stringify(data),
@@ -216,12 +247,19 @@ class ApiClient {
     });
   }
 
-  async getParticipant(roomId: string, participantId: number): Promise<{ participant: Participant }> {
+  async getParticipant(
+    roomId: string,
+    participantId: number
+  ): Promise<{ participant: Participant }> {
     return this.request(`/api/rooms/${roomId}/participants/${participantId}`);
   }
 
   // Waves
-  async sendWave(roomId: string, passphrase: string, toParticipantId: number): Promise<WaveResponse> {
+  async sendWave(
+    roomId: string,
+    passphrase: string,
+    toParticipantId: number
+  ): Promise<WaveResponse> {
     return this.request<WaveResponse>(`/api/rooms/${roomId}/waves`, {
       method: 'POST',
       body: JSON.stringify({ passphrase, to_participant_id: toParticipantId }),
@@ -233,15 +271,25 @@ class ApiClient {
   }
 
   async getWaveStatus(roomId: string, passphrase: string): Promise<WaveStatusResponse> {
-    return this.request<WaveStatusResponse>(`/api/rooms/${roomId}/waves/status?passphrase=${passphrase}`);
+    return this.request<WaveStatusResponse>(
+      `/api/rooms/${roomId}/waves/status?passphrase=${passphrase}`
+    );
   }
 
-  async getParticipantWaves(roomId: string, participantId: number): Promise<ParticipantWavesResponse> {
-    return this.request<ParticipantWavesResponse>(`/api/rooms/${roomId}/participants/${participantId}/waves`);
+  async getParticipantWaves(
+    roomId: string,
+    participantId: number
+  ): Promise<ParticipantWavesResponse> {
+    return this.request<ParticipantWavesResponse>(
+      `/api/rooms/${roomId}/participants/${participantId}/waves`
+    );
   }
 
   // Upload
-  async uploadFile(file: File, type: 'profile' | 'presentation' = 'presentation'): Promise<UploadResponse> {
+  async uploadFile(
+    file: File,
+    type: 'profile' | 'presentation' = 'presentation'
+  ): Promise<UploadResponse> {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('type', type);

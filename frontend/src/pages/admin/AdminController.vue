@@ -17,7 +17,14 @@ const loading = ref(true);
 const error = ref<string | null>(null);
 
 // Room state
-const { currentParticipant, nextParticipant, queueCount, presentedCount, fetchRoom, updateFromWebSocket } = useRoom(roomId);
+const {
+  currentParticipant,
+  nextParticipant,
+  queueCount,
+  presentedCount,
+  fetchRoom,
+  updateFromWebSocket,
+} = useRoom(roomId);
 
 // Timer state
 const timer = useTimer();
@@ -109,7 +116,9 @@ onMounted(() => {
     <!-- Loading -->
     <div v-if="loading" class="min-h-screen flex items-center justify-center">
       <div class="text-center">
-        <div class="w-12 h-12 mx-auto mb-4 rounded-full border-2 border-coral border-t-transparent animate-spin"></div>
+        <div
+          class="w-12 h-12 mx-auto mb-4 rounded-full border-2 border-coral border-t-transparent animate-spin"
+        ></div>
         <p class="text-subtle">Connecting...</p>
       </div>
     </div>
@@ -118,14 +127,17 @@ onMounted(() => {
     <div v-else-if="error" class="min-h-screen flex flex-col items-center justify-center p-6">
       <div class="w-16 h-16 rounded-full bg-error/20 flex items-center justify-center mb-6">
         <svg class="w-8 h-8 text-error" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
         </svg>
       </div>
       <h1 class="font-display text-xl font-bold text-cream mb-2">Access Denied</h1>
       <p class="text-subtle text-center mb-6">{{ error }}</p>
-      <button class="btn btn-ghost" @click="router.push('/')">
-        Go Home
-      </button>
+      <button class="btn btn-ghost" @click="router.push('/')">Go Home</button>
     </div>
 
     <!-- Admin Controller -->
@@ -139,10 +151,7 @@ onMounted(() => {
           </div>
           <div class="flex items-center gap-2">
             <span
-              :class="[
-                'status-dot',
-                isConnected ? 'status-dot-live' : 'status-dot-offline'
-              ]"
+              :class="['status-dot', isConnected ? 'status-dot-live' : 'status-dot-offline']"
             ></span>
             <span :class="['text-sm', isConnected ? 'text-success' : 'text-error']">
               {{ isConnected ? 'Live' : 'Offline' }}
@@ -160,7 +169,9 @@ onMounted(() => {
             <div>
               <p class="text-xs text-subtle uppercase tracking-wider mb-1">Now Presenting</p>
               <div v-if="currentParticipant" class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-coral/20 flex items-center justify-center text-coral font-display font-bold">
+                <div
+                  class="w-10 h-10 rounded-full bg-coral/20 flex items-center justify-center text-coral font-display font-bold"
+                >
                   {{ currentParticipant.name?.charAt(0)?.toUpperCase() }}
                 </div>
                 <div class="flex-1 min-w-0">
@@ -177,7 +188,9 @@ onMounted(() => {
             <div>
               <p class="text-xs text-subtle uppercase tracking-wider mb-1">Up Next</p>
               <div v-if="nextParticipant" class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-surface-overlay flex items-center justify-center text-subtle font-display font-bold">
+                <div
+                  class="w-10 h-10 rounded-full bg-surface-overlay flex items-center justify-center text-subtle font-display font-bold"
+                >
                   {{ nextParticipant.name?.charAt(0)?.toUpperCase() }}
                 </div>
                 <div class="flex-1 min-w-0">
@@ -196,7 +209,7 @@ onMounted(() => {
             'card border transition-all',
             timer.isOvertime.value
               ? 'bg-error/10 border-error/30'
-              : 'bg-surface-elevated border-white/5'
+              : 'bg-surface-elevated border-white/5',
           ]"
         >
           <div class="p-6 text-center">
@@ -210,12 +223,7 @@ onMounted(() => {
             </div>
 
             <!-- Timer -->
-            <p
-              :class="[
-                'text-6xl font-mono font-bold tabular-nums',
-                timer.timerClass.value
-              ]"
-            >
+            <p :class="['text-6xl font-mono font-bold tabular-nums', timer.timerClass.value]">
               {{ timer.displayTime.value }}
             </p>
 
@@ -224,10 +232,13 @@ onMounted(() => {
               <div
                 :class="[
                   'h-full rounded-full transition-all duration-300',
-                  timer.isOvertime.value ? 'bg-error' :
-                  timer.remaining.value <= 10 ? 'bg-error' :
-                  timer.remaining.value <= 20 ? 'bg-warning' :
-                  'bg-success'
+                  timer.isOvertime.value
+                    ? 'bg-error'
+                    : timer.remaining.value <= 10
+                      ? 'bg-error'
+                      : timer.remaining.value <= 20
+                        ? 'bg-warning'
+                        : 'bg-success',
                 ]"
                 :style="{ width: `${timer.progress.value}%` }"
               ></div>
@@ -242,17 +253,24 @@ onMounted(() => {
             @click="goPrevious"
           >
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
             Prev
           </button>
-          <button
-            class="btn btn-lg btn-primary h-16 font-display"
-            @click="goNext"
-          >
+          <button class="btn btn-lg btn-primary h-16 font-display" @click="goNext">
             Next
             <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 5l7 7-7 7"
+              />
             </svg>
           </button>
         </div>
@@ -264,20 +282,42 @@ onMounted(() => {
 
             <button
               class="btn btn-lg w-full h-14 font-display"
-              :class="timer.isRunning.value ? 'btn-error' : 'bg-success hover:bg-success/80 text-white'"
+              :class="
+                timer.isRunning.value ? 'btn-error' : 'bg-success hover:bg-success/80 text-white'
+              "
               @click="timer.isRunning.value ? stopTimer() : startTimer()"
             >
               <template v-if="timer.isRunning.value">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"
+                  />
                 </svg>
                 Stop Timer
               </template>
               <template v-else>
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
                 Start Timer
               </template>
@@ -288,7 +328,12 @@ onMounted(() => {
               @click="restartTimer"
             >
               <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
               </svg>
               Restart Timer
             </button>
