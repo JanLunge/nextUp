@@ -2,16 +2,6 @@ import type { ParticipantRow, ProfileRow, FormattedParticipant, FormattedProfile
 
 // Utility functions
 
-export function sanitizeHtml(str: string | null | undefined): string | null {
-  if (!str) return str as null;
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-
 export function validateUrl(url: string | null | undefined): boolean {
   if (!url) return true; // Optional field
   try {

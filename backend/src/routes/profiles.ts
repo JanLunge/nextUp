@@ -1,7 +1,7 @@
 import { Router, type Request, type Response } from 'express';
 import { profileQueries } from '../db.js';
 import { generatePassphrase } from '../words.js';
-import { formatProfile, sanitizeHtml } from '../utils.js';
+import { formatProfile } from '../utils.js';
 import type { PassphraseParams } from '../types/index.js';
 
 const router = Router();
@@ -16,11 +16,10 @@ router.post('/', (req: Request, res: Response) => {
     }
 
     const passphrase = generatePassphrase();
-    const sanitizedName = sanitizeHtml(name.trim());
 
     profileQueries.create.run(
       passphrase,
-      sanitizedName,
+      name.trim(),
       null, // tagline
       null, // profile_image_path
       null, // project_name
@@ -89,15 +88,15 @@ router.patch('/:passphrase', (req: Request<PassphraseParams>, res: Response) => 
     } = req.body;
 
     profileQueries.update.run(
-      sanitizeHtml(name) || profile.name,
-      sanitizeHtml(tagline) ?? profile.tagline,
+      name?.trim() || profile.name,
+      tagline?.trim() ?? profile.tagline,
       profile_image_path ?? profile.profile_image_path,
-      sanitizeHtml(project_name) ?? profile.project_name,
+      project_name?.trim() ?? profile.project_name,
       project_url ?? profile.project_url,
-      sanitizeHtml(project_description) ?? profile.project_description,
+      project_description?.trim() ?? profile.project_description,
       presentation_media_path ?? profile.presentation_media_path,
       media_type ?? profile.media_type,
-      sanitizeHtml(current_need) ?? profile.current_need,
+      current_need?.trim() ?? profile.current_need,
       profile.id
     );
 

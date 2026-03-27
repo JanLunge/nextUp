@@ -14,6 +14,8 @@ router.post('/:roomId/waves', (req: Request<RoomParams>, res: Response) => {
 
     const { passphrase, to_participant_id } = req.body;
 
+    console.log('Wave request body:', { passphrase, to_participant_id });
+
     if (!passphrase) {
       return res.status(400).json({ error: 'Passphrase required' });
     }
@@ -22,6 +24,7 @@ router.post('/:roomId/waves', (req: Request<RoomParams>, res: Response) => {
     }
 
     const profile = profileQueries.getByPassphrase.get(passphrase);
+    console.log('Profile lookup result:', profile);
     if (!profile) {
       return res.status(404).json({ error: 'Profile not found' });
     }

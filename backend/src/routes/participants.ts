@@ -1,7 +1,7 @@
 import { Router, type Request, type Response } from 'express';
 import { roomQueries, profileQueries, participantQueries } from '../db.js';
 import { generatePassphrase } from '../words.js';
-import { formatParticipant, sanitizeHtml, validateUrl } from '../utils.js';
+import { formatParticipant, validateUrl } from '../utils.js';
 import type { ParticipantRow, RoomParams, ParticipantParams } from '../types/index.js';
 
 const router = Router();
@@ -63,15 +63,15 @@ router.post('/:roomId/participants', (req: Request<RoomParams>, res: Response) =
       const newPassphrase = generatePassphrase();
       profileQueries.create.run(
         newPassphrase,
-        sanitizeHtml(name.trim()),
-        sanitizeHtml(tagline?.trim()) || null,
+        name.trim(),
+        tagline?.trim() || null,
         profile_image_path || null,
-        sanitizeHtml(project_name?.trim()) || '',
+        project_name?.trim() || '',
         project_url || null,
-        sanitizeHtml(project_description?.trim()) || '',
+        project_description?.trim() || '',
         presentation_media_path || null,
         media_type || null,
-        sanitizeHtml(current_need?.trim()) || null
+        current_need?.trim() || null
       );
       profile = profileQueries.getByPassphrase.get(newPassphrase);
       isNewProfile = true;
@@ -90,15 +90,15 @@ router.post('/:roomId/participants', (req: Request<RoomParams>, res: Response) =
     if (existingWithdrawn) {
       // Reactivate withdrawn submission with new data
       participantQueries.reactivate.run(
-        sanitizeHtml(name.trim()),
-        sanitizeHtml(tagline?.trim()) || null,
+        name.trim(),
+        tagline?.trim() || null,
         profile_image_path || null,
-        sanitizeHtml(project_name?.trim()) || '',
+        project_name?.trim() || '',
         project_url || null,
-        sanitizeHtml(project_description?.trim()) || '',
+        project_description?.trim() || '',
         presentation_media_path || null,
         media_type || null,
-        sanitizeHtml(current_need?.trim()) || null,
+        current_need?.trim() || null,
         next_position,
         existingWithdrawn.id
       );
@@ -108,15 +108,15 @@ router.post('/:roomId/participants', (req: Request<RoomParams>, res: Response) =
       participantQueries.create.run(
         room.id,
         profile.id,
-        sanitizeHtml(name.trim()),
-        sanitizeHtml(tagline?.trim()) || null,
+        name.trim(),
+        tagline?.trim() || null,
         profile_image_path || null,
-        sanitizeHtml(project_name?.trim()) || '',
+        project_name?.trim() || '',
         project_url || null,
-        sanitizeHtml(project_description?.trim()) || '',
+        project_description?.trim() || '',
         presentation_media_path || null,
         media_type || null,
-        sanitizeHtml(current_need?.trim()) || null,
+        current_need?.trim() || null,
         next_position
       );
       participant = participantQueries.getByRoomAndProfile.get(room.id, profile.id);
@@ -125,15 +125,15 @@ router.post('/:roomId/participants', (req: Request<RoomParams>, res: Response) =
     // Also update profile with latest data
     if (!isNewProfile) {
       profileQueries.update.run(
-        sanitizeHtml(name.trim()),
-        sanitizeHtml(tagline?.trim()) || profile.tagline,
-        profile_image_path || profile.profile_image_path,
-        sanitizeHtml(project_name?.trim()) || profile.project_name,
-        project_url || profile.project_url,
-        sanitizeHtml(project_description?.trim()) || profile.project_description,
-        presentation_media_path || profile.presentation_media_path,
-        media_type || profile.media_type,
-        sanitizeHtml(current_need?.trim()) || profile.current_need,
+        name.trim(),
+        tagline?.trim() ?? profile.tagline,
+        profile_image_path ?? profile.profile_image_path,
+        project_name?.trim() ?? profile.project_name,
+        project_url ?? profile.project_url,
+        project_description?.trim() ?? profile.project_description,
+        presentation_media_path ?? profile.presentation_media_path,
+        media_type ?? profile.media_type,
+        current_need?.trim() ?? profile.current_need,
         profile.id
       );
     }
@@ -282,15 +282,15 @@ router.patch('/:roomId/participants/me', (req: Request<RoomParams>, res: Respons
     }
 
     participantQueries.update.run(
-      sanitizeHtml(name) || participant.name,
-      sanitizeHtml(tagline) ?? participant.tagline,
+      name?.trim() || participant.name,
+      tagline?.trim() ?? participant.tagline,
       profile_image_path ?? participant.profile_image_path,
-      sanitizeHtml(project_name) || participant.project_name,
+      project_name?.trim() ?? participant.project_name,
       project_url ?? participant.project_url,
-      sanitizeHtml(project_description) || participant.project_description,
+      project_description?.trim() ?? participant.project_description,
       presentation_media_path ?? participant.presentation_media_path,
       media_type ?? participant.media_type,
-      sanitizeHtml(current_need) ?? participant.current_need,
+      current_need?.trim() ?? participant.current_need,
       participant.id
     );
 
