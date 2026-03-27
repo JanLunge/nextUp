@@ -280,20 +280,13 @@ class ApiClient {
 
   async startMapping(roomId: string, adminKey: string): Promise<{
     success: boolean;
-    numPhases: number;
+    totalTicks: number;
     numParticipants: number;
     assignments: Record<number, number>;
     participants: Array<{ id: number; name: string }>;
   }> {
     return this.request(`/api/rooms/${roomId}/spatial/mapping/start?admin_key=${adminKey}`, {
       method: 'POST',
-    });
-  }
-
-  async advanceMappingPhase(roomId: string, adminKey: string, phase: number, totalPhases: number, assignments: Record<number, number>): Promise<{ success: boolean }> {
-    return this.request(`/api/rooms/${roomId}/spatial/mapping/phase?admin_key=${adminKey}`, {
-      method: 'POST',
-      body: JSON.stringify({ phase, totalPhases, assignments }),
     });
   }
 

@@ -5,6 +5,7 @@ import type {
   ExtendedWebSocket,
   WSClient,
   TimerState,
+  MappingState,
   ClientRole,
   JoinMessage,
   TimerControlMessage,
@@ -15,12 +16,14 @@ export class WebSocketManager implements WebSocketManagerInterface {
   private wss: WebSocketServer;
   private rooms: Map<string, Map<string, WSClient>>;
   private timers: Map<string, TimerState>;
+  private mappingSessions: Map<string, MappingState>;
   private heartbeatInterval: NodeJS.Timeout;
 
   constructor(server: Server) {
     this.wss = new WebSocketServer({ server, path: '/ws' });
     this.rooms = new Map();
     this.timers = new Map();
+    this.mappingSessions = new Map();
 
     this.wss.on('connection', (ws: WS) => {
       const extWs = ws as ExtendedWebSocket;
@@ -312,9 +315,60 @@ export class WebSocketManager implements WebSocketManagerInterface {
     }
   }
 
+  // Spatial mapping management
+  startMapping(roomId: string, assignments: Record<number, number>, totalTicks: number, participants: Array<{ id: number; name: string; profile_id: number }>): void {
+    this.stopMapping(roomId);
+
+    const state: MappingState = {
+      assignments,
+      totalTicks,
+      currentTick: -1,
+      interval: null
+    };
+
+    // Broadcast mapping_start to all clients
+    this.broadcastToRoom(roomId, {
+      type: 'mapping_start',
+      assignments,
+      totalTicks,
+      participants
+    });
+
+    // Start auto-tick interval (400ms per tick)
+    state.interval = setInterval(() => {
+      state.currentTick++;
+      const tickInCycle = state.currentTick % totalTicks;
+
+      this.broadcastToRoom(roomId, {
+        type: 'mapping_tick',
+        tick: tickInCycle,
+        totalTicks,
+        cycle: Math.floor(state.currentTick / totalTicks)
+      });
+    }, 400);
+
+    this.mappingSessions.set(roomId, state);
+  }
+
+  stopMapping(roomId: string): void {
+    const state = this.mappingSessions.get(roomId);
+    if (state) {
+      if (state.interval) {
+        clearInterval(state.interval);
+      }
+      this.mappingSessions.delete(roomId);
+      this.broadcastToRoom(roomId, { type: 'mapping_end' });
+    }
+  }
+
   close(): void {
     clearInterval(this.heartbeatInterval);
     this.timers.forEach((state) => {
+      if (state.interval) {
+        clearInterval(state.interval);
+      }
+    });
+    this.mappingSessions.forEach((state) => {
       if (state.interval) {
         clearInterval(state.interval);
       }

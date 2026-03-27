@@ -127,7 +127,7 @@ router.post('/:roomId/spatial/order', (req: Request<RoomParams>, res: Response) 
   }
 });
 
-// Start mapping session - tells all phones to enter color display mode
+// Start mapping session - assigns IDs, starts auto-tick cycle on all phones
 router.post('/:roomId/spatial/mapping/start', (req: Request<RoomParams>, res: Response) => {
   try {
     const room = roomQueries.getById.get(req.params.roomId);
@@ -144,11 +144,11 @@ router.post('/:roomId/spatial/mapping/start', (req: Request<RoomParams>, res: Re
     const participants = (participantQueries.getQueuedByRoom.all(room.id) as ParticipantRow[])
       .filter(p => p.status !== 'withdrawn');
 
-    // Assign each participant a unique binary ID for color detection
     const numParticipants = participants.length;
-    const numPhases = Math.max(1, Math.ceil(Math.log2(numParticipants + 1)));
+    // 4 colors = 2 bits per tick. Need ceil(log2(N+1) / 2) ticks
+    const totalTicks = Math.max(1, Math.ceil(Math.log2(numParticipants + 1) / 2));
 
-    // Create assignments: participantId -> bitmask
+    // Assign each participant a unique ID (1..N) for 4-color encoding
     const assignments: Record<number, number> = {};
     participants.forEach((p, i) => {
       assignments[p.id] = i + 1; // Start from 1 so 0 = no phone
@@ -156,21 +156,17 @@ router.post('/:roomId/spatial/mapping/start', (req: Request<RoomParams>, res: Re
 
     const wsManager = req.app.get('wsManager');
     if (wsManager) {
-      wsManager.broadcastToRoom(room.id, {
-        type: 'mapping_start',
-        numPhases,
+      wsManager.startMapping(
+        room.id,
         assignments,
-        participants: participants.map(p => ({
-          id: p.id,
-          name: p.name,
-          profile_id: p.profile_id
-        }))
-      });
+        totalTicks,
+        participants.map(p => ({ id: p.id, name: p.name, profile_id: p.profile_id }))
+      );
     }
 
     res.json({
       success: true,
-      numPhases,
+      totalTicks,
       numParticipants,
       assignments,
       participants: participants.map(p => ({ id: p.id, name: p.name }))
@@ -181,39 +177,7 @@ router.post('/:roomId/spatial/mapping/start', (req: Request<RoomParams>, res: Re
   }
 });
 
-// Advance to next mapping phase
-router.post('/:roomId/spatial/mapping/phase', (req: Request<RoomParams>, res: Response) => {
-  try {
-    const room = roomQueries.getById.get(req.params.roomId);
-    if (!room) {
-      return res.status(404).json({ error: 'Room not found' });
-    }
-
-    const adminKey = req.query.admin_key as string;
-    if (!adminKey || !roomQueries.validateAdminKey.get(room.id, adminKey)) {
-      return res.status(403).json({ error: 'Invalid admin key' });
-    }
-
-    const { phase, totalPhases, assignments } = req.body;
-
-    const wsManager = req.app.get('wsManager');
-    if (wsManager) {
-      wsManager.broadcastToRoom(room.id, {
-        type: 'mapping_phase',
-        phase,
-        totalPhases,
-        assignments
-      });
-    }
-
-    res.json({ success: true, phase });
-  } catch (error) {
-    console.error('Error advancing mapping phase:', error);
-    res.status(500).json({ error: 'Failed to advance mapping phase' });
-  }
-});
-
-// End mapping session
+// End mapping session - stops auto-tick cycle
 router.post('/:roomId/spatial/mapping/end', (req: Request<RoomParams>, res: Response) => {
   try {
     const room = roomQueries.getById.get(req.params.roomId);
@@ -228,9 +192,7 @@ router.post('/:roomId/spatial/mapping/end', (req: Request<RoomParams>, res: Resp
 
     const wsManager = req.app.get('wsManager');
     if (wsManager) {
-      wsManager.broadcastToRoom(room.id, {
-        type: 'mapping_end'
-      });
+      wsManager.stopMapping(room.id);
     }
 
     res.json({ success: true });

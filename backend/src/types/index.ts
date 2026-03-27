@@ -173,6 +173,13 @@ export interface MappingControlMessage extends WSMessage {
   assignments?: Record<string, number>; // participantId -> bitmask
 }
 
+export interface MappingState {
+  assignments: Record<number, number>;
+  totalTicks: number;
+  currentTick: number;
+  interval: NodeJS.Timeout | null;
+}
+
 // Express extended types
 export interface WebSocketManagerInterface {
   broadcastToRoom(roomId: string, data: object): void;
@@ -181,6 +188,8 @@ export interface WebSocketManagerInterface {
   startTimer(roomId: string, duration?: number): void;
   stopTimer(roomId: string): void;
   restartTimer(roomId: string, duration?: number): void;
+  startMapping(roomId: string, assignments: Record<number, number>, totalTicks: number, participants: Array<{ id: number; name: string; profile_id: number }>): void;
+  stopMapping(roomId: string): void;
   close(): void;
 }
 

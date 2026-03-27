@@ -188,16 +188,16 @@ export interface WSParticipantWithdrawnMessage extends WSMessage {
 
 export interface WSMappingStartMessage extends WSMessage {
   type: 'mapping_start';
-  numPhases: number;
+  totalTicks: number;
   assignments: Record<number, number>;
   participants: MappingParticipant[];
 }
 
-export interface WSMappingPhaseMessage extends WSMessage {
-  type: 'mapping_phase';
-  phase: number;
-  totalPhases: number;
-  assignments: Record<number, number>;
+export interface WSMappingTickMessage extends WSMessage {
+  type: 'mapping_tick';
+  tick: number;
+  totalTicks: number;
+  cycle: number;
 }
 
 export interface WSMappingEndMessage extends WSMessage {

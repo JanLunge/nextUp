@@ -38,6 +38,7 @@ const profileId = ref<number | null>(null);
 const mappingActive = ref(false);
 const mappingColor = ref('#000000');
 const myParticipantId = ref<number | null>(null);
+const myMappingId = ref<number | null>(null);
 
 // WebSocket
 const { isConnected, connect } = useWebSocket(roomId, {
@@ -67,18 +68,21 @@ function handleWebSocketMessage(message: WSMessage): void {
   // Spatial mapping events
   if (message.type === 'mapping_start') {
     mappingActive.value = true;
-    mappingColor.value = '#000000'; // Start dark
+    // Store my assignment from the assignments map
+    const assignments = message.assignments as Record<number, number>;
+    if (myParticipantId.value && assignments[myParticipantId.value] !== undefined) {
+      myMappingId.value = assignments[myParticipantId.value];
+    }
+    mappingColor.value = '#000000';
   }
 
-  if (message.type === 'mapping_phase') {
-    const phase = message.phase as number;
-    const assignments = message.assignments as Record<number, number>;
-    // Find my participant ID from assignments
-    if (myParticipantId.value && assignments[myParticipantId.value] !== undefined) {
-      const myBitmask = assignments[myParticipantId.value];
-      // Check if my bit is set for this phase
-      const bitSet = (myBitmask >> phase) & 1;
-      mappingColor.value = bitSet ? '#FFFFFF' : '#000000';
+  if (message.type === 'mapping_tick') {
+    const tick = message.tick as number;
+    // 4 colors: red=0, green=1, blue=2, white=3
+    const COLORS = ['#FF0000', '#00FF00', '#0000FF', '#FFFFFF'];
+    if (myMappingId.value !== null) {
+      const colorIndex = (myMappingId.value >> (tick * 2)) & 3;
+      mappingColor.value = COLORS[colorIndex];
     } else {
       mappingColor.value = '#000000';
     }
@@ -87,6 +91,7 @@ function handleWebSocketMessage(message: WSMessage): void {
   if (message.type === 'mapping_end') {
     mappingActive.value = false;
     mappingColor.value = '#000000';
+    myMappingId.value = null;
   }
 }
 
