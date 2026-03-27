@@ -19,6 +19,12 @@ const routes: RouteRecordRaw[] = [
     props: true,
   },
   {
+    path: '/room/:roomId/admin/spatial',
+    name: 'spatialMapping',
+    component: () => import('@/pages/admin/SpatialMapping.vue'),
+    props: true,
+  },
+  {
     path: '/room/:roomId/timer',
     name: 'timer',
     component: () => import('@/pages/timer/TimerView.vue'),

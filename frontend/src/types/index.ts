@@ -84,6 +84,34 @@ export interface UploadResponse {
   size: number;
 }
 
+// Spatial mapping types
+export interface SpatialPosition {
+  id: number;
+  room_id: string;
+  participant_id: number;
+  x: number;
+  y: number;
+  name: string;
+  profile_image_path?: string | null;
+  project_name: string;
+}
+
+export interface SpatialOrderEntry {
+  id: number;
+  room_id: string;
+  participant_id: number;
+  order_index: number;
+  name: string;
+  profile_image_path?: string | null;
+  project_name: string;
+}
+
+export interface MappingParticipant {
+  id: number;
+  name: string;
+  profile_id: number;
+}
+
 // WebSocket message types
 export type TimerPhase = 'main' | 'need';
 
@@ -156,4 +184,32 @@ export interface WSParticipantWithdrawnMessage extends WSMessage {
   type: 'participant_withdrawn';
   participantId: number;
   queue_count: number;
+}
+
+export interface WSMappingStartMessage extends WSMessage {
+  type: 'mapping_start';
+  numPhases: number;
+  assignments: Record<number, number>;
+  participants: MappingParticipant[];
+}
+
+export interface WSMappingPhaseMessage extends WSMessage {
+  type: 'mapping_phase';
+  phase: number;
+  totalPhases: number;
+  assignments: Record<number, number>;
+}
+
+export interface WSMappingEndMessage extends WSMessage {
+  type: 'mapping_end';
+}
+
+export interface WSSpatialPositionsUpdatedMessage extends WSMessage {
+  type: 'spatial_positions_updated';
+  positions: SpatialPosition[];
+}
+
+export interface WSSpatialOrderUpdatedMessage extends WSMessage {
+  type: 'spatial_order_updated';
+  order: SpatialOrderEntry[];
 }

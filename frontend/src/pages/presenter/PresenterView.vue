@@ -10,7 +10,8 @@ import QRDropdown from './components/QRDropdown.vue';
 import CurrentPresenter from './components/CurrentPresenter.vue';
 import UpNext from './components/UpNext.vue';
 import WaveEmitter from '@/components/WaveEmitter.vue';
-import type { WSMessage } from '@/types';
+import SpatialMap from '@/components/SpatialMap.vue';
+import type { WSMessage, SpatialPosition, SpatialOrderEntry } from '@/types';
 
 interface WaveEmitterExpose {
   addWave: () => void;
@@ -24,6 +25,11 @@ const waveEmitter = ref<WaveEmitterExpose | null>(null);
 
 // Room state
 const { currentParticipant, nextParticipant, queueCount, fetchRoom, updateFromWebSocket } = useRoom(roomId);
+
+// Spatial data
+const spatialPositions = ref<SpatialPosition[]>([]);
+const spatialOrder = ref<SpatialOrderEntry[]>([]);
+const hasSpatialData = computed(() => spatialPositions.value.length > 0);
 
 // Timer state
 const timer = useTimer();
@@ -44,6 +50,27 @@ function handleWebSocketMessage(message: WSMessage): void {
   // Handle wave animation
   if (message.type === 'wave_animation') {
     waveEmitter.value?.addWave();
+  }
+
+  // Handle spatial updates
+  if (message.type === 'spatial_positions_updated') {
+    spatialPositions.value = (message.positions as SpatialPosition[]) || [];
+  }
+  if (message.type === 'spatial_order_updated') {
+    spatialOrder.value = (message.order as SpatialOrderEntry[]) || [];
+  }
+}
+
+async function fetchSpatialData(): Promise<void> {
+  try {
+    const [posResult, orderResult] = await Promise.all([
+      api.getSpatialPositions(roomId.value),
+      api.getSpatialOrder(roomId.value),
+    ]);
+    spatialPositions.value = posResult.positions;
+    spatialOrder.value = orderResult.order;
+  } catch (e) {
+    // Spatial data is optional, ignore errors
   }
 }
 
@@ -77,6 +104,7 @@ useEventListener('keydown', (e: KeyboardEvent) => {
 
 onMounted(async () => {
   await fetchRoom();
+  await fetchSpatialData();
   connect();
 });
 </script>
@@ -140,14 +168,56 @@ onMounted(async () => {
     </header>
 
     <!-- Main Content -->
-    <main class="relative z-10 flex-1 min-h-0 overflow-hidden">
-      <CurrentPresenter
-        :participant="currentParticipant"
-        :show-need="timer.showNeed.value"
-        :timer-progress="timer.progress.value"
-        :is-overtime="timer.isOvertime.value"
-        :room-id="roomId"
-      />
+    <main class="relative z-10 flex-1 min-h-0 overflow-hidden flex">
+      <!-- Presenter slide/info (takes more space when spatial map exists) -->
+      <div :class="hasSpatialData ? 'w-2/3' : 'w-full'" class="h-full">
+        <CurrentPresenter
+          :participant="currentParticipant"
+          :show-need="timer.showNeed.value"
+          :timer-progress="timer.progress.value"
+          :is-overtime="timer.isOvertime.value"
+          :room-id="roomId"
+        />
+      </div>
+
+      <!-- Spatial Map Sidebar (only when spatial data exists) -->
+      <div v-if="hasSpatialData" class="w-1/3 h-full flex flex-col p-4 gap-4">
+        <div class="flex-1">
+          <SpatialMap
+            :positions="spatialPositions"
+            :order="spatialOrder"
+            :current-participant-id="currentParticipant?.id"
+            :next-participant-id="nextParticipant?.id"
+          />
+        </div>
+
+        <!-- Timer display in sidebar -->
+        <div
+          v-if="timer.isRunning.value || timer.isOvertime.value"
+          class="text-center"
+        >
+          <p
+            :class="[
+              'text-5xl font-mono font-bold tabular-nums',
+              timer.timerClass.value
+            ]"
+          >
+            {{ timer.displayTime.value }}
+          </p>
+          <div class="mt-2 h-2 rounded-full bg-surface-overlay overflow-hidden">
+            <div
+              :class="[
+                'h-full rounded-full transition-all duration-300',
+                timer.isOvertime.value ? 'bg-error' :
+                timer.remaining.value <= 10 ? 'bg-error' :
+                timer.remaining.value <= 20 ? 'bg-warning' :
+                'bg-success'
+              ]"
+              :style="{ width: `${timer.progress.value}%` }"
+            ></div>
+          </div>
+        </div>
+      </div>
     </main>
 
     <!-- Footer / Up Next -->

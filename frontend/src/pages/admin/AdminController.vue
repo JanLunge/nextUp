@@ -295,6 +295,26 @@ onMounted(() => {
           </div>
         </div>
 
+        <!-- Spatial Mapping -->
+        <div class="card bg-surface-elevated border border-white/5">
+          <div class="p-4">
+            <p class="text-xs text-subtle uppercase tracking-wider mb-3">Spatial Mapping</p>
+            <button
+              class="btn w-full bg-coral/10 border border-coral/30 hover:bg-coral/20 text-coral font-display"
+              @click="router.push({ name: 'spatialMapping', params: { roomId }, query: { key: adminKey } })"
+            >
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Map Positions & Set Order
+            </button>
+            <p class="text-xs text-subtle mt-2 text-center">
+              Use camera to map where people are sitting, then draw presentation order
+            </p>
+          </div>
+        </div>
+
         <!-- Queue Stats -->
         <div class="grid grid-cols-2 gap-3">
           <div class="card bg-surface-elevated border border-white/5 p-4 text-center">

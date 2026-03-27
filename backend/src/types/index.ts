@@ -69,6 +69,23 @@ export interface WaveWithProfileInfo extends WaveRow {
   profile_image_path: string | null;
 }
 
+export interface SpatialPositionRow {
+  id: number;
+  room_id: string;
+  participant_id: number;
+  x: number;
+  y: number;
+  created_at: string;
+}
+
+export interface SpatialOrderRow {
+  id: number;
+  room_id: string;
+  participant_id: number;
+  order_index: number;
+  created_at: string;
+}
+
 // API response types
 export interface FormattedParticipant {
   id: number;
@@ -145,6 +162,15 @@ export interface TimerControlMessage extends WSMessage {
   action: 'start' | 'stop' | 'restart';
   roomId: string;
   duration?: number;
+}
+
+export interface MappingControlMessage extends WSMessage {
+  type: 'mapping_control';
+  action: 'start' | 'phase' | 'end';
+  roomId: string;
+  phase?: number;
+  totalPhases?: number;
+  assignments?: Record<string, number>; // participantId -> bitmask
 }
 
 // Express extended types

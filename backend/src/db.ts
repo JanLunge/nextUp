@@ -8,6 +8,8 @@ import type {
   WaveRow,
   WaveWithParticipantInfo,
   WaveWithProfileInfo,
+  SpatialPositionRow,
+  SpatialOrderRow,
   CountResult,
   NextPositionResult
 } from './types/index.js';
@@ -84,6 +86,31 @@ db.exec(`
     UNIQUE(room_id, from_profile_id, to_participant_id)
   );
 
+  -- Spatial positions (mapping participants to physical locations)
+  CREATE TABLE IF NOT EXISTS spatial_positions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    room_id TEXT NOT NULL,
+    participant_id INTEGER NOT NULL,
+    x REAL NOT NULL,
+    y REAL NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (room_id) REFERENCES rooms(id),
+    FOREIGN KEY (participant_id) REFERENCES participants(id),
+    UNIQUE(room_id, participant_id)
+  );
+
+  -- Spatial order (presentation order drawn on spatial map)
+  CREATE TABLE IF NOT EXISTS spatial_order (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    room_id TEXT NOT NULL,
+    participant_id INTEGER NOT NULL,
+    order_index INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (room_id) REFERENCES rooms(id),
+    FOREIGN KEY (participant_id) REFERENCES participants(id),
+    UNIQUE(room_id, participant_id)
+  );
+
   -- Indexes
   CREATE INDEX IF NOT EXISTS idx_participants_room ON participants(room_id);
   CREATE INDEX IF NOT EXISTS idx_participants_status ON participants(room_id, status);
@@ -91,6 +118,8 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_waves_room ON waves(room_id);
   CREATE INDEX IF NOT EXISTS idx_waves_to ON waves(to_participant_id);
   CREATE INDEX IF NOT EXISTS idx_waves_from ON waves(from_profile_id);
+  CREATE INDEX IF NOT EXISTS idx_spatial_positions_room ON spatial_positions(room_id);
+  CREATE INDEX IF NOT EXISTS idx_spatial_order_room ON spatial_order(room_id, order_index);
 `);
 
 // Room queries
@@ -255,6 +284,45 @@ export const waveQueries = {
     JOIN waves w2 ON w2.from_profile_id = p1.profile_id AND w2.to_participant_id = p2.id
     WHERE w1.room_id = ? AND w1.from_profile_id = ? AND w1.to_participant_id = ?
   `) as Statement<[string, number, number], { id: number }>
+};
+
+// Spatial queries
+export const spatialQueries = {
+  setPosition: db.prepare(`
+    INSERT INTO spatial_positions (room_id, participant_id, x, y)
+    VALUES (?, ?, ?, ?)
+    ON CONFLICT(room_id, participant_id) DO UPDATE SET x = excluded.x, y = excluded.y
+  `) as Statement,
+
+  getPositionsByRoom: db.prepare(`
+    SELECT sp.*, p.name, p.profile_image_path, p.project_name
+    FROM spatial_positions sp
+    JOIN participants p ON sp.participant_id = p.id
+    WHERE sp.room_id = ? AND p.status != 'withdrawn'
+    ORDER BY sp.participant_id
+  `) as Statement<[string], SpatialPositionRow & { name: string; profile_image_path: string | null; project_name: string }>,
+
+  clearPositions: db.prepare(`
+    DELETE FROM spatial_positions WHERE room_id = ?
+  `) as Statement,
+
+  setOrder: db.prepare(`
+    INSERT INTO spatial_order (room_id, participant_id, order_index)
+    VALUES (?, ?, ?)
+    ON CONFLICT(room_id, participant_id) DO UPDATE SET order_index = excluded.order_index
+  `) as Statement,
+
+  getOrderByRoom: db.prepare(`
+    SELECT so.*, p.name, p.profile_image_path, p.project_name
+    FROM spatial_order so
+    JOIN participants p ON so.participant_id = p.id
+    WHERE so.room_id = ? AND p.status != 'withdrawn'
+    ORDER BY so.order_index ASC
+  `) as Statement<[string], SpatialOrderRow & { name: string; profile_image_path: string | null; project_name: string }>,
+
+  clearOrder: db.prepare(`
+    DELETE FROM spatial_order WHERE room_id = ?
+  `) as Statement
 };
 
 export default db;

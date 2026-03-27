@@ -10,6 +10,7 @@ import profilesRouter from './routes/profiles.js';
 import participantsRouter from './routes/participants.js';
 import wavesRouter from './routes/waves.js';
 import uploadRouter from './routes/upload.js';
+import spatialRouter from './routes/spatial.js';
 import { WebSocketManager } from './websocket/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -39,6 +40,7 @@ app.use('/api/profiles', profilesRouter);
 app.use('/api/rooms', participantsRouter);
 app.use('/api/rooms', wavesRouter);
 app.use('/api/upload', uploadRouter);
+app.use('/api/rooms', spatialRouter);
 
 // Health check
 app.get('/api/health', (_req: Request, res: Response) => {

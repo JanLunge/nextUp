@@ -9,6 +9,7 @@ import CurrentPresenterCard from '@/components/CurrentPresenterCard.vue';
 import ParticipantCard from '@/components/ParticipantCard.vue';
 import YouAreNextModal from '@/components/YouAreNextModal.vue';
 import WaveEmitter from '@/components/WaveEmitter.vue';
+import ColorDisplay from '@/components/ColorDisplay.vue';
 import type { WSMessage, Participant } from '@/types';
 
 interface WaveEmitterExpose {
@@ -32,6 +33,11 @@ const presentedParticipants = ref<Participant[]>([]);
 const showYouAreNext = ref(false);
 const wavedParticipants = ref<Set<number>>(new Set());
 const profileId = ref<number | null>(null);
+
+// Spatial mapping state
+const mappingActive = ref(false);
+const mappingColor = ref('#000000');
+const myParticipantId = ref<number | null>(null);
 
 // WebSocket
 const { isConnected, connect } = useWebSocket(roomId, {
@@ -57,6 +63,31 @@ function handleWebSocketMessage(message: WSMessage): void {
   if (message.type === 'presenter_changed') {
     fetchPresentedParticipants();
   }
+
+  // Spatial mapping events
+  if (message.type === 'mapping_start') {
+    mappingActive.value = true;
+    mappingColor.value = '#000000'; // Start dark
+  }
+
+  if (message.type === 'mapping_phase') {
+    const phase = message.phase as number;
+    const assignments = message.assignments as Record<number, number>;
+    // Find my participant ID from assignments
+    if (myParticipantId.value && assignments[myParticipantId.value] !== undefined) {
+      const myBitmask = assignments[myParticipantId.value];
+      // Check if my bit is set for this phase
+      const bitSet = (myBitmask >> phase) & 1;
+      mappingColor.value = bitSet ? '#FFFFFF' : '#000000';
+    } else {
+      mappingColor.value = '#000000';
+    }
+  }
+
+  if (message.type === 'mapping_end') {
+    mappingActive.value = false;
+    mappingColor.value = '#000000';
+  }
 }
 
 // Fetch presented participants
@@ -77,6 +108,9 @@ async function fetchProfile(): Promise<void> {
     const result = await api.checkPassphraseInRoom(roomId.value, passphrase.value);
     if (result.profile_exists) {
       profileId.value = result.profile_id ?? null;
+      if (result.participant) {
+        myParticipantId.value = result.participant.id;
+      }
     }
   } catch (e) {
     console.error('Failed to fetch profile:', e);
@@ -139,6 +173,13 @@ onMounted(async () => {
 
 <template>
   <div class="min-h-screen bg-surface pb-24">
+    <!-- Spatial Mapping Color Display -->
+    <ColorDisplay
+      :active="mappingActive"
+      :color="mappingColor"
+      :participant-name="currentParticipant?.name || ''"
+    />
+
     <!-- Wave Emitter -->
     <WaveEmitter ref="waveEmitter" />
 

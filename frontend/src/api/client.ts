@@ -6,6 +6,9 @@ import type {
   SubmissionData,
   UploadResponse,
   WavesResponse,
+  SpatialPosition,
+  SpatialOrderEntry,
+  MappingParticipant,
 } from '@/types';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
@@ -249,6 +252,54 @@ class ApiClient {
     return this.request<UploadResponse>(`/api/upload?type=${type}`, {
       method: 'POST',
       body: formData,
+    });
+  }
+
+  // Spatial mapping
+  async getSpatialPositions(roomId: string): Promise<{ positions: SpatialPosition[] }> {
+    return this.request(`/api/rooms/${roomId}/spatial/positions`);
+  }
+
+  async saveSpatialPositions(roomId: string, adminKey: string, positions: Array<{ participant_id: number; x: number; y: number }>): Promise<{ success: boolean; count: number }> {
+    return this.request(`/api/rooms/${roomId}/spatial/positions?admin_key=${adminKey}`, {
+      method: 'POST',
+      body: JSON.stringify({ positions }),
+    });
+  }
+
+  async getSpatialOrder(roomId: string): Promise<{ order: SpatialOrderEntry[] }> {
+    return this.request(`/api/rooms/${roomId}/spatial/order`);
+  }
+
+  async saveSpatialOrder(roomId: string, adminKey: string, order: number[]): Promise<{ success: boolean; count: number }> {
+    return this.request(`/api/rooms/${roomId}/spatial/order?admin_key=${adminKey}`, {
+      method: 'POST',
+      body: JSON.stringify({ order }),
+    });
+  }
+
+  async startMapping(roomId: string, adminKey: string): Promise<{
+    success: boolean;
+    numPhases: number;
+    numParticipants: number;
+    assignments: Record<number, number>;
+    participants: Array<{ id: number; name: string }>;
+  }> {
+    return this.request(`/api/rooms/${roomId}/spatial/mapping/start?admin_key=${adminKey}`, {
+      method: 'POST',
+    });
+  }
+
+  async advanceMappingPhase(roomId: string, adminKey: string, phase: number, totalPhases: number, assignments: Record<number, number>): Promise<{ success: boolean }> {
+    return this.request(`/api/rooms/${roomId}/spatial/mapping/phase?admin_key=${adminKey}`, {
+      method: 'POST',
+      body: JSON.stringify({ phase, totalPhases, assignments }),
+    });
+  }
+
+  async endMapping(roomId: string, adminKey: string): Promise<{ success: boolean }> {
+    return this.request(`/api/rooms/${roomId}/spatial/mapping/end?admin_key=${adminKey}`, {
+      method: 'POST',
     });
   }
 
