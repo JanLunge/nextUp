@@ -50,7 +50,6 @@ const trackedBlobs = ref<TrackedBlob[]>([]);
 const cameraOffsetX = ref(0);
 const cameraOffsetY = ref(0);
 let frameCount = 0;
-let captureTimeout: number | null = null;
 
 // Map of assignedId -> participant info (reverse lookup)
 const participantsByAssignedId = computed(() => {
@@ -101,8 +100,14 @@ const swipeStart = ref<{ x: number; y: number } | null>(null);
 const swipeEnd = ref<{ x: number; y: number } | null>(null);
 const swipeActive = ref(false);
 
+// Ack status display
+const ackedCount = ref(0);
+const expectedCount = ref(0);
+const currentTickDisplay = ref(0);
+const currentCycleDisplay = ref(0);
+
 // ── WebSocket ──
-const { isConnected, connect } = useWebSocket(roomId, {
+const { isConnected, connect, sendMessage } = useWebSocket(roomId, {
   role: 'admin',
   adminKey: adminKey.value,
   onMessage: handleWebSocketMessage,
@@ -110,12 +115,19 @@ const { isConnected, connect } = useWebSocket(roomId, {
 
 function handleWebSocketMessage(message: WSMessage): void {
   if (message.type === 'mapping_tick' && step.value === 'scanning') {
+    // Track current tick info for display
+    currentTickDisplay.value = message.tick as number;
+    currentCycleDisplay.value = message.cycle as number;
+  }
+
+  if (message.type === 'mapping_tick_ready' && step.value === 'scanning') {
     const tick = message.tick as number;
-    // Capture frame 200ms after tick (give phones time to update)
-    if (captureTimeout) clearTimeout(captureTimeout);
-    captureTimeout = window.setTimeout(() => {
-      processCurrentFrame(tick);
-    }, 200);
+    ackedCount.value = message.ackedCount as number;
+    expectedCount.value = message.expectedCount as number;
+    // All phones confirmed color display — capture now
+    processCurrentFrame(tick);
+    // Tell server we captured, so it sends the next tick
+    sendMessage({ type: 'mapping_captured', roomId: roomId.value });
   }
 }
 
@@ -467,7 +479,6 @@ async function finishScanning(): Promise<void> {
     // Continue anyway
   }
   stopCamera();
-  if (captureTimeout) clearTimeout(captureTimeout);
 
   // Save detected positions
   const positions = normalizedPositions.value;
@@ -570,7 +581,6 @@ onMounted(() => {
 
 onUnmounted(() => {
   stopCamera();
-  if (captureTimeout) clearTimeout(captureTimeout);
 });
 </script>
 
@@ -694,11 +704,17 @@ onUnmounted(() => {
               <p class="text-xs text-white/70">Detected</p>
               <p class="text-lg font-bold text-coral">{{ identifiedCount }}<span class="text-white/50 text-sm">/{{ participants.length }}</span></p>
             </div>
-            <div class="bg-black/60 backdrop-blur rounded-lg px-3 py-2">
+            <div class="bg-black/60 backdrop-blur rounded-lg px-3 py-2 text-right">
               <div class="flex items-center gap-2">
                 <div class="w-2 h-2 rounded-full bg-coral animate-pulse"></div>
                 <span class="text-xs text-white/70">Scanning</span>
               </div>
+              <p class="text-[10px] text-white/50 mt-1">
+                Phones: {{ ackedCount }}/{{ expectedCount }}
+              </p>
+              <p class="text-[10px] text-white/50">
+                Tick {{ currentTickDisplay + 1 }}/{{ totalTicks }} &middot; Cycle {{ currentCycleDisplay + 1 }}
+              </p>
             </div>
           </div>
         </div>

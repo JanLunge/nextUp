@@ -72,13 +72,19 @@ export class WebSocketManager implements WebSocketManagerInterface {
     }
   }
 
-  private handleMessage(ws: ExtendedWebSocket, data: JoinMessage | TimerControlMessage): void {
+  private handleMessage(ws: ExtendedWebSocket, data: JoinMessage | TimerControlMessage | { type: string; roomId?: string; [key: string]: unknown }): void {
     switch (data.type) {
       case 'join':
         this.handleJoin(ws, data as JoinMessage);
         break;
       case 'timer_control':
         this.handleTimerControl(ws, data as TimerControlMessage);
+        break;
+      case 'mapping_ack':
+        this.handleMappingAck(ws);
+        break;
+      case 'mapping_captured':
+        this.handleMappingCaptured(ws);
         break;
       default:
         this.send(ws, { type: 'error', message: 'Unknown message type' });
@@ -315,16 +321,30 @@ export class WebSocketManager implements WebSocketManagerInterface {
     }
   }
 
-  // Spatial mapping management
+  // Spatial mapping management — ack-driven protocol
   startMapping(roomId: string, assignments: Record<number, number>, totalTicks: number, participants: Array<{ id: number; name: string; profile_id: number }>): void {
     this.stopMapping(roomId);
+
+    // Count audience clients currently in the room
+    const roomClients = this.rooms.get(roomId);
+    let audienceCount = 0;
+    if (roomClients) {
+      roomClients.forEach(({ role }) => {
+        if (role === 'audience') audienceCount++;
+      });
+    }
 
     const state: MappingState = {
       assignments,
       totalTicks,
       currentTick: -1,
-      interval: null
+      expectedAcks: Math.max(1, audienceCount),
+      receivedAcks: new Set(),
+      tickReadySent: false,
+      ackTimeout: null,
     };
+
+    this.mappingSessions.set(roomId, state);
 
     // Broadcast mapping_start to all clients
     this.broadcastToRoom(roomId, {
@@ -334,27 +354,90 @@ export class WebSocketManager implements WebSocketManagerInterface {
       participants
     });
 
-    // Start auto-tick interval (400ms per tick)
-    state.interval = setInterval(() => {
-      state.currentTick++;
-      const tickInCycle = state.currentTick % totalTicks;
+    // Send the first tick after a brief delay for phones to initialize
+    setTimeout(() => {
+      this.sendMappingTick(roomId);
+    }, 500);
+  }
 
-      this.broadcastToRoom(roomId, {
-        type: 'mapping_tick',
+  private sendMappingTick(roomId: string): void {
+    const state = this.mappingSessions.get(roomId);
+    if (!state) return;
+
+    state.currentTick++;
+    const tickInCycle = state.currentTick % state.totalTicks;
+
+    // Reset ack tracking for this tick
+    state.receivedAcks.clear();
+    state.tickReadySent = false;
+
+    // Broadcast tick to all clients (phones will update color)
+    this.broadcastToRoom(roomId, {
+      type: 'mapping_tick',
+      tick: tickInCycle,
+      totalTicks: state.totalTicks,
+      cycle: Math.floor(state.currentTick / state.totalTicks)
+    });
+
+    // Timeout: if not all acks arrive within 2s, send tick_ready anyway
+    if (state.ackTimeout) clearTimeout(state.ackTimeout);
+    state.ackTimeout = setTimeout(() => {
+      if (!state.tickReadySent) {
+        state.tickReadySent = true;
+        this.broadcastToRoles(roomId, ['admin'], {
+          type: 'mapping_tick_ready',
+          tick: tickInCycle,
+          totalTicks: state.totalTicks,
+          cycle: Math.floor(state.currentTick / state.totalTicks),
+          ackedCount: state.receivedAcks.size,
+          expectedCount: state.expectedAcks
+        });
+      }
+    }, 2000);
+  }
+
+  private handleMappingAck(ws: ExtendedWebSocket): void {
+    if (!ws.roomId || !ws.clientId) return;
+    const state = this.mappingSessions.get(ws.roomId);
+    if (!state || state.tickReadySent) return;
+
+    state.receivedAcks.add(ws.clientId);
+
+    // Check if enough acks received (all audience or 80% threshold)
+    const threshold = Math.max(1, Math.ceil(state.expectedAcks * 0.8));
+    if (state.receivedAcks.size >= threshold) {
+      state.tickReadySent = true;
+      if (state.ackTimeout) {
+        clearTimeout(state.ackTimeout);
+        state.ackTimeout = null;
+      }
+
+      const tickInCycle = state.currentTick % state.totalTicks;
+      this.broadcastToRoles(ws.roomId, ['admin'], {
+        type: 'mapping_tick_ready',
         tick: tickInCycle,
-        totalTicks,
-        cycle: Math.floor(state.currentTick / totalTicks)
+        totalTicks: state.totalTicks,
+        cycle: Math.floor(state.currentTick / state.totalTicks),
+        ackedCount: state.receivedAcks.size,
+        expectedCount: state.expectedAcks
       });
-    }, 400);
+    }
+  }
 
-    this.mappingSessions.set(roomId, state);
+  private handleMappingCaptured(ws: ExtendedWebSocket): void {
+    if (!ws.roomId || ws.role !== 'admin') return;
+    const state = this.mappingSessions.get(ws.roomId);
+    if (!state) return;
+
+    // Admin captured the frame — send the next tick
+    this.sendMappingTick(ws.roomId);
   }
 
   stopMapping(roomId: string): void {
     const state = this.mappingSessions.get(roomId);
     if (state) {
-      if (state.interval) {
-        clearInterval(state.interval);
+      if (state.ackTimeout) {
+        clearTimeout(state.ackTimeout);
       }
       this.mappingSessions.delete(roomId);
       this.broadcastToRoom(roomId, { type: 'mapping_end' });
@@ -369,8 +452,8 @@ export class WebSocketManager implements WebSocketManagerInterface {
       }
     });
     this.mappingSessions.forEach((state) => {
-      if (state.interval) {
-        clearInterval(state.interval);
+      if (state.ackTimeout) {
+        clearTimeout(state.ackTimeout);
       }
     });
     this.wss.close();

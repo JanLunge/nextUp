@@ -177,7 +177,10 @@ export interface MappingState {
   assignments: Record<number, number>;
   totalTicks: number;
   currentTick: number;
-  interval: NodeJS.Timeout | null;
+  expectedAcks: number;
+  receivedAcks: Set<string>;
+  tickReadySent: boolean;
+  ackTimeout: NodeJS.Timeout | null;
 }
 
 // Express extended types

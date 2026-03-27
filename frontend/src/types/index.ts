@@ -200,6 +200,15 @@ export interface WSMappingTickMessage extends WSMessage {
   cycle: number;
 }
 
+export interface WSMappingTickReadyMessage extends WSMessage {
+  type: 'mapping_tick_ready';
+  tick: number;
+  totalTicks: number;
+  cycle: number;
+  ackedCount: number;
+  expectedCount: number;
+}
+
 export interface WSMappingEndMessage extends WSMessage {
   type: 'mapping_end';
 }

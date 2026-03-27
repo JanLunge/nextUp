@@ -41,7 +41,7 @@ const myParticipantId = ref<number | null>(null);
 const myMappingId = ref<number | null>(null);
 
 // WebSocket
-const { isConnected, connect } = useWebSocket(roomId, {
+const { isConnected, connect, sendMessage } = useWebSocket(roomId, {
   role: 'audience',
   passphrase: passphrase.value ?? undefined,
   onMessage: handleWebSocketMessage,
@@ -86,6 +86,8 @@ function handleWebSocketMessage(message: WSMessage): void {
     } else {
       mappingColor.value = '#000000';
     }
+    // Ack back to server so it knows we displayed the color
+    sendMessage({ type: 'mapping_ack', roomId: roomId.value });
   }
 
   if (message.type === 'mapping_end') {
