@@ -66,6 +66,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/pages/participant/WavesView.vue'),
     props: true,
   },
+  {
+    path: '/test/spatial',
+    name: 'spatialMock',
+    component: () => import('@/pages/test/SpatialMock.vue'),
+  },
 ];
 
 const router = createRouter({
