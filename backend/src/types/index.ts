@@ -1,4 +1,3 @@
-import type { Request, Response, NextFunction } from 'express';
 import type { WebSocket } from 'ws';
 
 // Database row types
@@ -116,7 +115,7 @@ export interface ExtendedWebSocket extends WebSocket {
   profileId?: number;
 }
 
-export type ClientRole = 'presenter' | 'admin' | 'timer' | 'audience';
+export type ClientRole = 'presenter' | 'admin' | 'timer' | 'audience' | 'participant';
 
 export interface TimerState {
   running: boolean;
@@ -159,6 +158,7 @@ export interface WebSocketManagerInterface {
 }
 
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Application {
       get(name: 'wsManager'): WebSocketManagerInterface | undefined;

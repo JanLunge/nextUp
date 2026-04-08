@@ -65,7 +65,12 @@ onMounted(() => {
         <div class="flex items-center gap-4">
           <button class="btn btn-ghost btn-sm btn-square" @click="goBack">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
           </button>
           <div>
@@ -82,9 +87,7 @@ onMounted(() => {
         <button
           :class="[
             'flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all',
-            activeTab === 'received'
-              ? 'bg-coral text-white'
-              : 'text-subtle hover:text-cream'
+            activeTab === 'received' ? 'bg-coral text-white' : 'text-subtle hover:text-cream',
           ]"
           @click="activeTab = 'received'"
         >
@@ -93,9 +96,7 @@ onMounted(() => {
         <button
           :class="[
             'flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all',
-            activeTab === 'sent'
-              ? 'bg-coral text-white'
-              : 'text-subtle hover:text-cream'
+            activeTab === 'sent' ? 'bg-coral text-white' : 'text-subtle hover:text-cream',
           ]"
           @click="activeTab = 'sent'"
         >
@@ -107,7 +108,9 @@ onMounted(() => {
     <!-- Loading -->
     <div v-if="loading" class="flex items-center justify-center min-h-[40vh]">
       <div class="text-center">
-        <div class="w-10 h-10 mx-auto mb-3 rounded-full border-2 border-coral border-t-transparent animate-spin"></div>
+        <div
+          class="w-10 h-10 mx-auto mb-3 rounded-full border-2 border-coral border-t-transparent animate-spin"
+        ></div>
         <p class="text-subtle text-sm">Loading waves...</p>
       </div>
     </div>
@@ -128,11 +131,15 @@ onMounted(() => {
           class="card bg-surface-elevated border border-white/5 animate-fade-up"
         >
           <div class="p-8 text-center">
-            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-coral/10 flex items-center justify-center">
+            <div
+              class="w-16 h-16 mx-auto mb-4 rounded-full bg-coral/10 flex items-center justify-center"
+            >
               <span class="text-3xl">👋</span>
             </div>
             <p class="font-display font-bold text-cream mb-2">No waves yet</p>
-            <p class="text-subtle text-sm">When someone waves at your presentation, you'll see it here</p>
+            <p class="text-subtle text-sm">
+              When someone waves at your presentation, you'll see it here
+            </p>
           </div>
         </div>
 
@@ -144,7 +151,9 @@ onMounted(() => {
         >
           <div class="p-4">
             <div class="flex items-center gap-3">
-              <div class="w-11 h-11 rounded-full flex items-center justify-center font-display font-bold bg-surface-overlay text-subtle">
+              <div
+                class="w-11 h-11 rounded-full flex items-center justify-center font-display font-bold bg-surface-overlay text-subtle"
+              >
                 {{ wave.name?.charAt(0)?.toUpperCase() }}
               </div>
               <div>
@@ -165,7 +174,9 @@ onMounted(() => {
           class="card bg-surface-elevated border border-white/5 animate-fade-up"
         >
           <div class="p-8 text-center">
-            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-coral/10 flex items-center justify-center">
+            <div
+              class="w-16 h-16 mx-auto mb-4 rounded-full bg-coral/10 flex items-center justify-center"
+            >
               <span class="text-3xl">✨</span>
             </div>
             <p class="font-display font-bold text-cream mb-2">No waves sent</p>
@@ -181,7 +192,9 @@ onMounted(() => {
         >
           <div class="p-4">
             <div class="flex items-center gap-3">
-              <div class="w-11 h-11 rounded-full flex items-center justify-center font-display font-bold bg-coral/20 text-coral">
+              <div
+                class="w-11 h-11 rounded-full flex items-center justify-center font-display font-bold bg-coral/20 text-coral"
+              >
                 {{ wave.name?.charAt(0)?.toUpperCase() }}
               </div>
               <div>

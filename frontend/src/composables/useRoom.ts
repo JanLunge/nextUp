@@ -1,6 +1,14 @@
 import { ref, computed, type Ref, type ComputedRef } from 'vue';
 import { api } from '@/api/client';
-import type { Room, Participant, WSMessage, WSPresenterChangedMessage, WSParticipantJoinedMessage, WSParticipantWithdrawnMessage, WSParticipantUpdatedMessage } from '@/types';
+import type {
+  Room,
+  Participant,
+  WSMessage,
+  WSPresenterChangedMessage,
+  WSParticipantJoinedMessage,
+  WSParticipantWithdrawnMessage,
+  WSParticipantUpdatedMessage,
+} from '@/types';
 
 export interface UseRoomReturn {
   room: Ref<Room | null>;

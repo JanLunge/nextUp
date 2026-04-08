@@ -78,7 +78,12 @@ onUnmounted(() => {
       @click="toggleDropdown"
     >
       <svg class="w-6 h-6 text-cream" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h2M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h2M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
+        />
       </svg>
     </button>
 
@@ -104,7 +109,7 @@ onUnmounted(() => {
               'p-3 rounded-xl text-center transition-all',
               selectedType === type.id
                 ? 'bg-coral text-white'
-                : 'bg-surface-overlay text-subtle hover:bg-slate hover:text-cream'
+                : 'bg-surface-overlay text-subtle hover:bg-slate hover:text-cream',
             ]"
             @click="selectedType = type.id"
           >
@@ -122,7 +127,7 @@ onUnmounted(() => {
 
         <!-- Type Description -->
         <p class="text-sm text-subtle mt-4 text-center">
-          {{ types.find(t => t.id === selectedType)?.description }}
+          {{ types.find((t) => t.id === selectedType)?.description }}
         </p>
 
         <!-- URL -->
@@ -131,10 +136,7 @@ onUnmounted(() => {
             <code class="text-xs text-cream/70 flex-1 truncate font-mono">
               {{ currentUrl }}
             </code>
-            <button
-              class="btn btn-ghost btn-xs text-coral hover:text-coral-light"
-              @click="copyUrl"
-            >
+            <button class="btn btn-ghost btn-xs text-coral hover:text-coral-light" @click="copyUrl">
               Copy
             </button>
           </div>
@@ -143,12 +145,7 @@ onUnmounted(() => {
 
       <!-- Close -->
       <div class="p-3 border-t border-white/5">
-        <button
-          class="btn btn-ghost btn-sm w-full"
-          @click="isOpen = false"
-        >
-          Close
-        </button>
+        <button class="btn btn-ghost btn-sm w-full" @click="isOpen = false">Close</button>
       </div>
     </div>
   </div>

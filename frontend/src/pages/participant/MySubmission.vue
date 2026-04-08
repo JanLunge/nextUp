@@ -116,7 +116,12 @@ onMounted(() => {
         <div class="flex items-center gap-4">
           <button class="btn btn-ghost btn-sm btn-square" @click="goBack">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
           </button>
           <h1 class="font-display font-bold text-cream">My Submission</h1>
@@ -127,7 +132,9 @@ onMounted(() => {
     <!-- Loading -->
     <div v-if="loading" class="flex items-center justify-center min-h-[60vh]">
       <div class="text-center">
-        <div class="w-12 h-12 mx-auto mb-4 rounded-full border-2 border-coral border-t-transparent animate-spin"></div>
+        <div
+          class="w-12 h-12 mx-auto mb-4 rounded-full border-2 border-coral border-t-transparent animate-spin"
+        ></div>
         <p class="text-subtle">Loading...</p>
       </div>
     </div>
@@ -146,9 +153,11 @@ onMounted(() => {
         <div
           :class="[
             'card border animate-fade-up',
-            submission.status === 'presenting' ? 'bg-coral/10 border-coral/30' :
-            submission.status === 'presented' ? 'bg-success/10 border-success/30' :
-            'bg-surface-elevated border-white/5'
+            submission.status === 'presenting'
+              ? 'bg-coral/10 border-coral/30'
+              : submission.status === 'presented'
+                ? 'bg-success/10 border-success/30'
+                : 'bg-surface-elevated border-white/5',
           ]"
         >
           <div class="p-5">
@@ -156,7 +165,12 @@ onMounted(() => {
               <div class="flex items-center gap-3">
                 <span class="text-2xl">{{ getStatusInfo(submission.status).icon }}</span>
                 <div>
-                  <p :class="['font-display font-bold text-lg', getStatusInfo(submission.status).color]">
+                  <p
+                    :class="[
+                      'font-display font-bold text-lg',
+                      getStatusInfo(submission.status).color,
+                    ]"
+                  >
                     {{ getStatusInfo(submission.status).label }}
                   </p>
                   <p v-if="submission.status === 'queued'" class="text-sm text-subtle">
@@ -167,16 +181,28 @@ onMounted(() => {
 
               <!-- Presenting animation -->
               <div v-if="submission.status === 'presenting'" class="flex gap-1">
-                <span class="w-2 h-2 rounded-full bg-coral animate-bounce" style="animation-delay: 0ms;"></span>
-                <span class="w-2 h-2 rounded-full bg-coral animate-bounce" style="animation-delay: 150ms;"></span>
-                <span class="w-2 h-2 rounded-full bg-coral animate-bounce" style="animation-delay: 300ms;"></span>
+                <span
+                  class="w-2 h-2 rounded-full bg-coral animate-bounce"
+                  style="animation-delay: 0ms"
+                ></span>
+                <span
+                  class="w-2 h-2 rounded-full bg-coral animate-bounce"
+                  style="animation-delay: 150ms"
+                ></span>
+                <span
+                  class="w-2 h-2 rounded-full bg-coral animate-bounce"
+                  style="animation-delay: 300ms"
+                ></span>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Media Preview -->
-        <div v-if="getMediaUrl(submission.presentation_media_path)" class="animate-fade-up delay-150">
+        <div
+          v-if="getMediaUrl(submission.presentation_media_path)"
+          class="animate-fade-up delay-150"
+        >
           <div class="rounded-xl overflow-hidden bg-surface-elevated border border-white/5">
             <video
               v-if="submission.media_type === 'video'"
@@ -198,18 +224,24 @@ onMounted(() => {
           <div class="p-5 space-y-4">
             <!-- Name is always shown -->
             <div class="flex items-center gap-3">
-              <div class="w-12 h-12 rounded-full bg-coral/20 flex items-center justify-center text-xl font-bold text-coral">
+              <div
+                class="w-12 h-12 rounded-full bg-coral/20 flex items-center justify-center text-xl font-bold text-coral"
+              >
                 {{ submission.name?.charAt(0)?.toUpperCase() || '?' }}
               </div>
               <div>
                 <h2 class="font-display text-xl font-bold text-cream">{{ submission.name }}</h2>
-                <p v-if="submission.tagline" class="text-sm text-subtle">{{ submission.tagline }}</p>
+                <p v-if="submission.tagline" class="text-sm text-subtle">
+                  {{ submission.tagline }}
+                </p>
               </div>
             </div>
 
             <!-- Project Name (if provided) -->
             <div v-if="submission.project_name">
-              <h3 class="font-display text-lg font-bold text-coral">{{ submission.project_name }}</h3>
+              <h3 class="font-display text-lg font-bold text-coral">
+                {{ submission.project_name }}
+              </h3>
               <a
                 v-if="submission.project_url"
                 :href="submission.project_url"
@@ -222,10 +254,15 @@ onMounted(() => {
             </div>
 
             <!-- Project Description (if provided) -->
-            <p v-if="submission.project_description" class="text-cream/80">{{ submission.project_description }}</p>
+            <p v-if="submission.project_description" class="text-cream/80">
+              {{ submission.project_description }}
+            </p>
 
             <!-- Empty state if no project details -->
-            <div v-if="!submission.project_name && !submission.project_description" class="p-4 bg-surface-overlay/50 rounded-xl border border-white/5 border-dashed">
+            <div
+              v-if="!submission.project_name && !submission.project_description"
+              class="p-4 bg-surface-overlay/50 rounded-xl border border-white/5 border-dashed"
+            >
               <p class="text-subtle text-sm text-center">No project details added yet</p>
             </div>
 
@@ -234,7 +271,9 @@ onMounted(() => {
               v-if="submission.current_need"
               class="p-4 bg-coral/10 border border-coral/20 rounded-xl"
             >
-              <p class="text-xs text-coral uppercase tracking-wider font-medium mb-1">Looking For</p>
+              <p class="text-xs text-coral uppercase tracking-wider font-medium mb-1">
+                Looking For
+              </p>
               <p class="text-cream">{{ submission.current_need }}</p>
             </div>
           </div>
@@ -249,7 +288,12 @@ onMounted(() => {
             @click="withdraw"
           >
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
             Withdraw Submission
           </button>
@@ -260,18 +304,27 @@ onMounted(() => {
             class="p-4 bg-success/10 border border-success/30 rounded-xl"
           >
             <div class="flex items-start gap-3">
-              <svg class="w-6 h-6 text-success shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                class="w-6 h-6 text-success shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
               <div>
                 <p class="font-medium text-success">Great presentation!</p>
-                <p class="text-sm text-subtle mt-1">Check your waves to see who wants to connect with you.</p>
+                <p class="text-sm text-subtle mt-1">
+                  Check your waves to see who wants to connect with you.
+                </p>
               </div>
             </div>
-            <button
-              class="btn btn-success w-full mt-4"
-              @click="goToWaves"
-            >
+            <button class="btn btn-success w-full mt-4" @click="goToWaves">
               <span class="text-lg mr-2">👋</span>
               View My Waves
             </button>

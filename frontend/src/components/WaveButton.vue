@@ -37,9 +37,7 @@ async function handleWave(): Promise<void> {
   <button
     :class="[
       'btn gap-2 font-display font-semibold transition-all duration-200',
-      hasWaved
-        ? 'bg-success/20 border-success/30 text-success hover:bg-success/25'
-        : 'btn-primary',
+      hasWaved ? 'bg-success/20 border-success/30 text-success hover:bg-success/25' : 'btn-primary',
       size === 'sm' && 'btn-sm',
       size === 'lg' && 'btn-lg',
     ]"

@@ -15,14 +15,22 @@ if (!fs.existsSync(uploadPath)) {
 
 // Configure multer
 const storage = multer.diskStorage({
-  destination: (_req: Request, _file: Express.Multer.File, cb: (error: Error | null, destination: string) => void) => {
+  destination: (
+    _req: Request,
+    _file: Express.Multer.File,
+    cb: (error: Error | null, destination: string) => void
+  ) => {
     cb(null, uploadPath);
   },
-  filename: (_req: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => {
+  filename: (
+    _req: Request,
+    file: Express.Multer.File,
+    cb: (error: Error | null, filename: string) => void
+  ) => {
     const ext = path.extname(file.originalname).toLowerCase();
     const filename = `${uuidv4()}${ext}`;
     cb(null, filename);
-  }
+  },
 });
 
 const fileFilter = (req: Request, file: Express.Multer.File, cb: FileFilterCallback): void => {
@@ -32,7 +40,7 @@ const fileFilter = (req: Request, file: Express.Multer.File, cb: FileFilterCallb
   // Allowed types based on upload type
   const allowedTypes: Record<UploadType, string[]> = {
     profile: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
-    presentation: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm']
+    presentation: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm'],
   };
 
   const allowed = allowedTypes[type || 'presentation'];
@@ -48,8 +56,8 @@ const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: parseInt(process.env.MAX_FILE_SIZE || '52428800', 10) // 50MB default
-  }
+    fileSize: parseInt(process.env.MAX_FILE_SIZE || '52428800', 10), // 50MB default
+  },
 });
 
 // Upload file
@@ -69,7 +77,7 @@ router.post('/', upload.single('file'), (req: Request, res: Response) => {
       path: `/uploads/${req.file.filename}`,
       media_type: mediaType,
       original_name: req.file.originalname,
-      size: req.file.size
+      size: req.file.size,
     });
   } catch (error) {
     console.error('Error uploading file:', error);

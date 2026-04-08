@@ -27,7 +27,7 @@ router.post('/', (req: Request, res: Response) => {
       null, // project_description
       null, // presentation_media_path
       null, // media_type
-      null  // current_need
+      null // current_need
     );
 
     const profile = profileQueries.getByPassphrase.get(passphrase);
@@ -39,7 +39,7 @@ router.post('/', (req: Request, res: Response) => {
     res.status(201).json({
       id: profile.id,
       passphrase,
-      name: profile.name
+      name: profile.name,
     });
   } catch (error) {
     console.error('Error creating profile:', error);
@@ -58,7 +58,7 @@ router.get('/:passphrase', (req: Request<PassphraseParams>, res: Response) => {
 
     res.json({
       exists: true,
-      profile: formatProfile(profile)
+      profile: formatProfile(profile),
     });
   } catch (error) {
     console.error('Error validating passphrase:', error);
@@ -84,7 +84,7 @@ router.patch('/:passphrase', (req: Request<PassphraseParams>, res: Response) => 
       project_description,
       presentation_media_path,
       media_type,
-      current_need
+      current_need,
     } = req.body;
 
     profileQueries.update.run(
@@ -103,7 +103,7 @@ router.patch('/:passphrase', (req: Request<PassphraseParams>, res: Response) => 
     const updatedProfile = profileQueries.getById.get(profile.id);
 
     res.json({
-      profile: formatProfile(updatedProfile)
+      profile: formatProfile(updatedProfile),
     });
   } catch (error) {
     console.error('Error updating profile:', error);

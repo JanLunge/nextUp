@@ -44,7 +44,9 @@ const joinUrl = computed(() => {
     <!-- Left: Media Section (larger) -->
     <div class="w-1/2 lg:w-3/5 flex flex-col">
       <!-- Media Container -->
-      <div class="flex-1 relative rounded-2xl overflow-hidden bg-surface-elevated border border-white/5">
+      <div
+        class="flex-1 relative rounded-2xl overflow-hidden bg-surface-elevated border border-white/5"
+      >
         <!-- Glow effect on media (disabled for now) -->
         <!-- <div
           v-if="!isOvertime"
@@ -75,10 +77,7 @@ const joinUrl = computed(() => {
           :alt="participant.project_name"
           class="w-full h-full object-cover"
         />
-        <div
-          v-else
-          class="w-full h-full flex items-center justify-center"
-        >
+        <div v-else class="w-full h-full flex items-center justify-center">
           <!-- Large initial as placeholder -->
           <span class="text-[200px] font-display font-bold text-coral/20">
             {{ participant.name?.charAt(0)?.toUpperCase() }}
@@ -129,7 +128,12 @@ const joinUrl = computed(() => {
           class="inline-flex items-center gap-2 text-subtle hover:text-cream transition-colors"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+            />
           </svg>
           {{ participant.project_url }}
         </a>
@@ -148,7 +152,12 @@ const joinUrl = computed(() => {
         <div class="flex items-start gap-4">
           <div class="w-10 h-10 rounded-full bg-coral/20 flex items-center justify-center shrink-0">
             <svg class="w-5 h-5 text-coral" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
           </div>
           <div>
@@ -167,12 +176,25 @@ const joinUrl = computed(() => {
       <div class="relative mb-8">
         <!-- Slow pulsing rings -->
         <div class="absolute -inset-8 rounded-3xl border-2 border-coral/20 pulse-slow"></div>
-        <div class="absolute -inset-4 rounded-2xl border-2 border-coral/30 pulse-slow" style="animation-delay: 1s;"></div>
+        <div
+          class="absolute -inset-4 rounded-2xl border-2 border-coral/30 pulse-slow"
+          style="animation-delay: 1s"
+        ></div>
 
         <!-- QR Code -->
-        <div class="relative p-8 bg-surface-elevated rounded-2xl border border-white/10 inline-block">
+        <div
+          class="relative p-8 bg-surface-elevated rounded-2xl border border-white/10 inline-block"
+        >
           <div class="w-[200px] h-[200px]">
-            <QrcodeVue :value="joinUrl" :size="200" level="M" render-as="svg" foreground="#FAF7F2" background="transparent" class="block" />
+            <QrcodeVue
+              :value="joinUrl"
+              :size="200"
+              level="M"
+              render-as="svg"
+              foreground="#FAF7F2"
+              background="transparent"
+              class="block"
+            />
           </div>
         </div>
       </div>
@@ -191,7 +213,8 @@ const joinUrl = computed(() => {
 }
 
 @keyframes pulse-slow {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.3;
     transform: scale(1);
   }

@@ -1,11 +1,12 @@
-import { ref, onUnmounted, type Ref, type ComputedRef } from 'vue';
-import { useWebSocket as useVueWebSocket } from '@vueuse/core';
 import type { WSMessage } from '@/types';
+import { useWebSocket as useVueWebSocket } from '@vueuse/core';
+import { onUnmounted, ref, type ComputedRef, type Ref } from 'vue';
 
 function getWsUrl(): string {
   if (import.meta.env.VITE_WS_URL) {
     return import.meta.env.VITE_WS_URL;
   }
+
   // Derive WebSocket URL from current page location
   // Use /ws path which gets proxied in development
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -50,7 +51,7 @@ export function useWebSocket(
   const lastMessage = ref<WSMessage | null>(null);
   const error = ref<string | null>(null);
 
-  const url = ref('');
+  const url = ref(WS_BASE);
 
   const getRoomId = (): string => {
     if (typeof roomId === 'string') return roomId;
@@ -78,7 +79,10 @@ export function useWebSocket(
         passphrase,
         adminKey,
       };
-      console.log('[WS] Sending join message:', { ...joinMessage, passphrase: passphrase ? `${passphrase.substring(0, 10)}...` : null });
+      console.log('[WS] Sending join message:', {
+        ...joinMessage,
+        passphrase: passphrase ? `${passphrase.substring(0, 10)}...` : null,
+      });
       send(JSON.stringify(joinMessage));
     },
     onDisconnected() {
@@ -86,7 +90,8 @@ export function useWebSocket(
     },
     onError(e) {
       error.value = 'WebSocket error';
-      console.error('WebSocket error:', e);
+      console.error('[WS] WebSocket error:', e);
+      console.error('[WS] Attempted URL:', url.value);
     },
     onMessage(_ws, event) {
       try {

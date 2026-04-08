@@ -51,6 +51,7 @@ A real-time web app for managing live presentation sessions where audience membe
 ## Real-time Events (WebSocket)
 
 Key events broadcasted:
+
 - `presenter_changed` — next/prev navigation
 - `timer_start/tick/end/overtime` — countdown state
 - `wave_animation` — trigger floating 👋 on screen
@@ -101,10 +102,25 @@ Key events broadcasted:
 ```bash
 # Backend
 cd backend && npm install && npm run dev
+npm run build    # Build project
+npm run format   # Format code
+npm run lint     # Lint code
 
 # Frontend
 cd frontend && npm install && npm run dev
+npm run build    # Build project
+npm run format   # Format code
+npm run lint     # Lint code
 ```
+
+## Code Style & Standards
+
+After modifying any files, STRICTLY follow this execution order in the relevant directory:
+
+1. **Format**: `npm run format`
+2. **Lint**: `npm run lint`
+
+Always resolve all linting errors before considering a task complete.
 
 ## Environment Variables
 
@@ -119,4 +135,3 @@ FRONTEND_URL=http://localhost:5173
 ## See Also
 
 - `projectIdea.md` — Full specification with wireframes, DB schema, API details
-

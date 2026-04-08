@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
 import { api } from '@/api/client';
 import { usePassphrase } from '@/composables/usePassphrase';
 import type { Room } from '@/types';
+import { computed, nextTick, onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
 const router = useRouter();
@@ -30,7 +30,7 @@ const copied = ref(false);
 async function fetchRoomInfo(): Promise<void> {
   try {
     roomInfo.value = await api.getRoom(roomId.value);
-  } catch (e) {
+  } catch (_e) {
     error.value = 'Room not found';
   }
 }
@@ -50,8 +50,8 @@ async function joinAsNew(): Promise<void> {
     newPassphrase.value = result.passphrase;
     setPassphrase(result.passphrase);
     showConfirmation.value = true;
-  } catch (e) {
-    error.value = e instanceof Error ? e.message : 'Failed to create profile';
+  } catch (_e) {
+    error.value = _e instanceof Error ? _e.message : 'Failed to create profile';
   } finally {
     loading.value = false;
   }
@@ -82,8 +82,8 @@ async function joinWithPassphrase(): Promise<void> {
     } else {
       router.push({ name: 'roomView', params: { roomId: roomId.value } });
     }
-  } catch (e) {
-    error.value = e instanceof Error ? e.message : 'Failed to validate passphrase';
+  } catch (_e) {
+    error.value = _e instanceof Error ? _e.message : 'Failed to validate passphrase';
   } finally {
     loading.value = false;
   }
@@ -99,7 +99,7 @@ function copyPassphrase(): void {
   if (newPassphrase.value) {
     navigator.clipboard.writeText(newPassphrase.value);
     copied.value = true;
-    setTimeout(() => copied.value = false, 2000);
+    setTimeout(() => (copied.value = false), 2000);
   }
 }
 
@@ -120,24 +120,35 @@ onMounted(async () => {
 <template>
   <div class="min-h-screen bg-gradient-stage relative overflow-hidden">
     <!-- Ambient glow -->
-    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-coral/10 rounded-full blur-[100px] pointer-events-none"></div>
+    <div
+      class="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-coral/10 rounded-full blur-[100px] pointer-events-none"
+    ></div>
 
     <div class="relative z-10 min-h-screen flex flex-col items-center justify-center p-6">
-
       <!-- Join Confirmation (Success State) -->
       <div v-if="showConfirmation" class="w-full max-w-md animate-scale-in">
         <div class="card bg-surface-elevated/80 backdrop-blur-xl border border-white/5 shadow-2xl">
           <div class="p-8 text-center">
             <!-- Success Icon -->
-            <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-success/20 flex items-center justify-center glow-success">
-              <svg class="w-10 h-10 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            <div
+              class="w-20 h-20 mx-auto mb-6 rounded-full bg-success/20 flex items-center justify-center glow-success"
+            >
+              <svg
+                class="w-10 h-10 text-success"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M5 13l4 4L19 7"
+                />
               </svg>
             </div>
 
-            <h2 class="font-display text-2xl font-bold text-cream mb-2">
-              Welcome, {{ name }}!
-            </h2>
+            <h2 class="font-display text-2xl font-bold text-cream mb-2">Welcome, {{ name }}!</h2>
             <p class="text-subtle">You're in the room</p>
 
             <!-- Passphrase -->
@@ -158,8 +169,18 @@ onMounted(async () => {
             <!-- Warning -->
             <div class="p-4 bg-warning/10 border border-warning/30 rounded-xl mb-6 text-left">
               <div class="flex items-start gap-3">
-                <svg class="w-5 h-5 text-warning shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                <svg
+                  class="w-5 h-5 text-warning shrink-0 mt-0.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
                 </svg>
                 <p class="text-sm text-warning">
                   Save this passphrase! You'll need it to rejoin or reuse your profile.
@@ -173,7 +194,12 @@ onMounted(async () => {
             >
               Enter Room
               <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 7l5 5m0 0l-5 5m5-5H6"
+                />
               </svg>
             </button>
           </div>
@@ -188,12 +214,16 @@ onMounted(async () => {
           <p class="text-subtle">Join the presentation queue</p>
         </div>
 
-        <div class="card bg-surface-elevated/80 backdrop-blur-xl border border-white/5 shadow-2xl animate-fade-up delay-150">
+        <div
+          class="card bg-surface-elevated/80 backdrop-blur-xl border border-white/5 shadow-2xl animate-fade-up delay-150"
+        >
           <div class="p-8">
             <!-- Room Code Badge -->
             <div class="flex justify-center mb-6">
               <div class="px-6 py-3 bg-surface-overlay rounded-2xl border border-white/5">
-                <p class="text-xs text-subtle uppercase tracking-wider mb-1 text-center">Room Code</p>
+                <p class="text-xs text-subtle uppercase tracking-wider mb-1 text-center">
+                  Room Code
+                </p>
                 <p class="room-code text-2xl text-coral text-center">{{ roomId }}</p>
               </div>
             </div>
@@ -201,10 +231,14 @@ onMounted(async () => {
             <!-- Room Status -->
             <div v-if="roomInfo" class="text-center mb-6 p-3 bg-surface-overlay/50 rounded-xl">
               <p v-if="roomInfo.current_participant" class="text-sm text-cream">
-                Now presenting: <span class="font-semibold text-coral">{{ roomInfo.current_participant.name }}</span>
+                Now presenting:
+                <span class="font-semibold text-coral">{{
+                  roomInfo.current_participant.name
+                }}</span>
               </p>
               <p class="text-sm text-subtle">
-                <span class="font-semibold text-cream">{{ roomInfo.queue_count }}</span> people in queue
+                <span class="font-semibold text-cream">{{ roomInfo.queue_count }}</span> people in
+                queue
               </p>
             </div>
 

@@ -24,7 +24,7 @@ router.post('/', (req: Request, res: Response) => {
       id: room.id,
       admin_key,
       timer_duration: room.timer_duration,
-      created_at: room.created_at
+      created_at: room.created_at,
     });
   } catch (error) {
     console.error('Error creating room:', error);
@@ -61,7 +61,7 @@ router.get('/:roomId', (req: Request<RoomParams>, res: Response) => {
       current_participant: formatParticipant(currentParticipant),
       next_participant: formatParticipant(nextParticipant),
       queue_count: queueCount,
-      presented_count: presentedCount
+      presented_count: presentedCount,
     });
   } catch (error) {
     console.error('Error getting room:', error);
@@ -96,7 +96,7 @@ router.patch('/:roomId', (req: Request<RoomParams>, res: Response) => {
       id: updatedRoom.id,
       timer_duration: updatedRoom.timer_duration,
       current_index: updatedRoom.current_index,
-      status: updatedRoom.status
+      status: updatedRoom.status,
     });
   } catch (error) {
     console.error('Error updating room:', error);
@@ -142,8 +142,8 @@ router.get('/:roomId/admin', (req: Request<RoomParams>, res: Response) => {
         current_participant: formatParticipant(currentParticipant),
         next_participant: formatParticipant(nextParticipant),
         queue_count: queueCount,
-        presented_count: presentedCount
-      }
+        presented_count: presentedCount,
+      },
     });
   } catch (error) {
     console.error('Error validating admin key:', error);
@@ -173,8 +173,11 @@ router.get('/:roomId/check', (req: Request<RoomParams>, res: Response) => {
     const participant = participantQueries.getByRoomAndProfile.get(room.id, profile.id);
 
     if (participant && participant.status !== 'withdrawn') {
-      const queuedParticipants = participantQueries.getQueuedByRoom.all(room.id) as ParticipantRow[];
-      const position = queuedParticipants.findIndex((p: ParticipantRow) => p.id === participant.id) + 1;
+      const queuedParticipants = participantQueries.getQueuedByRoom.all(
+        room.id
+      ) as ParticipantRow[];
+      const position =
+        queuedParticipants.findIndex((p: ParticipantRow) => p.id === participant.id) + 1;
 
       return res.json({
         profile_exists: true,
@@ -182,7 +185,7 @@ router.get('/:roomId/check', (req: Request<RoomParams>, res: Response) => {
         has_submission_in_room: true,
         submission_status: participant.status,
         queue_position: position > 0 ? position : null,
-        participant: formatParticipant(participant)
+        participant: formatParticipant(participant),
       });
     }
 
@@ -200,8 +203,8 @@ router.get('/:roomId/check', (req: Request<RoomParams>, res: Response) => {
         project_description: profile.project_description,
         presentation_media_path: profile.presentation_media_path,
         media_type: profile.media_type,
-        current_need: profile.current_need
-      }
+        current_need: profile.current_need,
+      },
     });
   } catch (error) {
     console.error('Error checking passphrase:', error);
@@ -244,8 +247,12 @@ router.post('/:roomId/next', (req: Request<RoomParams>, res: Response) => {
 
     // Re-fetch to get updated state
     const updatedParticipants = participantQueries.getQueuedByRoom.all(room.id) as ParticipantRow[];
-    const newCurrentParticipant = updatedParticipants.find((p: ParticipantRow) => p.status === 'presenting');
-    const newQueuedParticipants = updatedParticipants.filter((p: ParticipantRow) => p.status === 'queued');
+    const newCurrentParticipant = updatedParticipants.find(
+      (p: ParticipantRow) => p.status === 'presenting'
+    );
+    const newQueuedParticipants = updatedParticipants.filter(
+      (p: ParticipantRow) => p.status === 'queued'
+    );
     const newNextParticipant = newQueuedParticipants[0] || null;
 
     // Broadcast via WebSocket
@@ -256,14 +263,16 @@ router.post('/:roomId/next', (req: Request<RoomParams>, res: Response) => {
         current_participant: formatParticipant(newCurrentParticipant),
         next_participant: formatParticipant(newNextParticipant),
         queue_count: participantQueries.getQueueCount.get(room.id)?.count ?? 0,
-        direction: 'next'
+        direction: 'next',
       });
 
       // Notify next presenter they're up next
       if (newNextParticipant) {
-        console.log(`[ROOMS] Notifying next participant: profile_id=${newNextParticipant.profile_id}, name=${newNextParticipant.name}`);
+        console.log(
+          `[ROOMS] Notifying next participant: profile_id=${newNextParticipant.profile_id}, name=${newNextParticipant.name}`
+        );
         wsManager.notifyParticipant(room.id, newNextParticipant.profile_id, {
-          type: 'you_are_next'
+          type: 'you_are_next',
         });
       }
     }
@@ -272,7 +281,7 @@ router.post('/:roomId/next', (req: Request<RoomParams>, res: Response) => {
     res.json({
       current_index: updatedRoom?.current_index,
       current_participant: formatParticipant(newCurrentParticipant),
-      next_participant: formatParticipant(newNextParticipant)
+      next_participant: formatParticipant(newNextParticipant),
     });
   } catch (error) {
     console.error('Error going to next presenter:', error);
@@ -295,10 +304,14 @@ router.post('/:roomId/previous', (req: Request<RoomParams>, res: Response) => {
     }
 
     // Get all non-withdrawn participants
-    const allParticipants = (participantQueries.getByRoom.all(room.id) as ParticipantRow[]).filter((p: ParticipantRow) => p.status !== 'withdrawn');
+    const allParticipants = (participantQueries.getByRoom.all(room.id) as ParticipantRow[]).filter(
+      (p: ParticipantRow) => p.status !== 'withdrawn'
+    );
 
     // Find the current presenter
-    const currentParticipant = allParticipants.find((p: ParticipantRow) => p.status === 'presenting');
+    const currentParticipant = allParticipants.find(
+      (p: ParticipantRow) => p.status === 'presenting'
+    );
 
     // Get presented participants sorted by queue_position descending (most recent first)
     const presentedParticipants = allParticipants
@@ -323,8 +336,12 @@ router.post('/:roomId/previous', (req: Request<RoomParams>, res: Response) => {
 
     // Re-fetch to get updated state
     const updatedParticipants = participantQueries.getQueuedByRoom.all(room.id) as ParticipantRow[];
-    const newCurrentParticipant = updatedParticipants.find((p: ParticipantRow) => p.status === 'presenting');
-    const newQueuedParticipants = updatedParticipants.filter((p: ParticipantRow) => p.status === 'queued');
+    const newCurrentParticipant = updatedParticipants.find(
+      (p: ParticipantRow) => p.status === 'presenting'
+    );
+    const newQueuedParticipants = updatedParticipants.filter(
+      (p: ParticipantRow) => p.status === 'queued'
+    );
     const newNextParticipant = newQueuedParticipants[0] || null;
 
     // Broadcast via WebSocket
@@ -335,7 +352,7 @@ router.post('/:roomId/previous', (req: Request<RoomParams>, res: Response) => {
         current_participant: formatParticipant(newCurrentParticipant),
         next_participant: formatParticipant(newNextParticipant),
         queue_count: participantQueries.getQueueCount.get(room.id)?.count ?? 0,
-        direction: 'previous'
+        direction: 'previous',
       });
     }
 
@@ -343,7 +360,7 @@ router.post('/:roomId/previous', (req: Request<RoomParams>, res: Response) => {
     res.json({
       current_index: updatedRoom?.current_index,
       current_participant: formatParticipant(newCurrentParticipant),
-      next_participant: formatParticipant(newNextParticipant)
+      next_participant: formatParticipant(newNextParticipant),
     });
   } catch (error) {
     console.error('Error going to previous presenter:', error);

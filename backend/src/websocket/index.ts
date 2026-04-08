@@ -1,14 +1,14 @@
-import { WebSocketServer, type WebSocket as WS } from 'ws';
 import type { Server } from 'http';
-import { roomQueries, profileQueries } from '../db.js';
+import { WebSocketServer, type WebSocket as WS } from 'ws';
+import { profileQueries, roomQueries } from '../db.js';
 import type {
-  ExtendedWebSocket,
-  WSClient,
-  TimerState,
   ClientRole,
+  ExtendedWebSocket,
   JoinMessage,
   TimerControlMessage,
-  WebSocketManagerInterface
+  TimerState,
+  WebSocketManagerInterface,
+  WSClient,
 } from '../types/index.js';
 
 export class WebSocketManager implements WebSocketManagerInterface {
@@ -33,6 +33,7 @@ export class WebSocketManager implements WebSocketManagerInterface {
       extWs.on('message', (message: Buffer) => {
         try {
           const data = JSON.parse(message.toString());
+          console.log(`[WS] Received message type: ${data.type}`);
           this.handleMessage(extWs, data);
         } catch (error) {
           console.error('WebSocket message error:', error);
@@ -64,7 +65,8 @@ export class WebSocketManager implements WebSocketManagerInterface {
   }
 
   private send(ws: ExtendedWebSocket, data: object): void {
-    if (ws.readyState === 1) { // WebSocket.OPEN
+    if (ws.readyState === 1) {
+      // WebSocket.OPEN
       ws.send(JSON.stringify(data));
     }
   }
@@ -83,6 +85,9 @@ export class WebSocketManager implements WebSocketManagerInterface {
   }
 
   private handleJoin(ws: ExtendedWebSocket, data: JoinMessage): void {
+    console.log(
+      `[WS] Join request: roomId=${data.roomId}, role=${data.role}, hasPassphrase=${!!data.passphrase}`
+    );
     const { roomId, role, passphrase, adminKey } = data;
 
     // Validate room exists
@@ -104,7 +109,9 @@ export class WebSocketManager implements WebSocketManagerInterface {
     let profile = null;
     if (passphrase) {
       profile = profileQueries.getByPassphrase.get(passphrase);
-      console.log(`[WS] Join with passphrase: profile=${profile?.id}, passphrase=${passphrase?.substring(0, 10)}...`);
+      console.log(
+        `[WS] Join with passphrase: profile=${profile?.id}, passphrase=${passphrase?.substring(0, 10)}...`
+      );
     } else {
       console.log(`[WS] Join without passphrase, role=${role}`);
     }
@@ -125,14 +132,14 @@ export class WebSocketManager implements WebSocketManagerInterface {
     roomClients.set(clientId, {
       ws,
       role,
-      profileId: profile?.id
+      profileId: profile?.id,
     });
 
     this.send(ws, {
       type: 'joined',
       roomId,
       role,
-      clientId
+      clientId,
     });
 
     // Send current timer state if timer is running
@@ -144,7 +151,7 @@ export class WebSocketManager implements WebSocketManagerInterface {
         duration: timerState.duration,
         phase: timerState.phase,
         overtime: timerState.overtime,
-        running: true
+        running: true,
       });
     }
   }
@@ -225,7 +232,9 @@ export class WebSocketManager implements WebSocketManagerInterface {
     });
 
     if (!found) {
-      console.log(`[WS] notifyParticipant: No client found with profileId=${profileId} in room ${roomId}`);
+      console.log(
+        `[WS] notifyParticipant: No client found with profileId=${profileId} in room ${roomId}`
+      );
     }
   }
 
@@ -243,7 +252,7 @@ export class WebSocketManager implements WebSocketManagerInterface {
       remaining: timerDuration,
       phase: 'main',
       overtime: 0,
-      interval: null
+      interval: null,
     };
 
     timerState.interval = setInterval(() => {
@@ -254,7 +263,7 @@ export class WebSocketManager implements WebSocketManagerInterface {
 
     this.broadcastToRoom(roomId, {
       type: 'timer_start',
-      duration: timerDuration
+      duration: timerDuration,
     });
   }
 
@@ -268,7 +277,7 @@ export class WebSocketManager implements WebSocketManagerInterface {
       this.timers.delete(roomId);
 
       this.broadcastToRoom(roomId, {
-        type: 'timer_cleared'
+        type: 'timer_cleared',
       });
     }
   }
@@ -294,12 +303,12 @@ export class WebSocketManager implements WebSocketManagerInterface {
       this.broadcastToRoom(roomId, {
         type: 'timer_tick',
         remaining: timerState.remaining,
-        phase: timerState.phase
+        phase: timerState.phase,
       });
 
       if (timerState.remaining === 0) {
         this.broadcastToRoom(roomId, {
-          type: 'timer_end'
+          type: 'timer_end',
         });
       }
     } else {
@@ -307,7 +316,7 @@ export class WebSocketManager implements WebSocketManagerInterface {
       timerState.overtime++;
       this.broadcastToRoom(roomId, {
         type: 'timer_overtime',
-        elapsed: timerState.overtime
+        elapsed: timerState.overtime,
       });
     }
   }

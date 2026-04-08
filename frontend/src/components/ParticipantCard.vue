@@ -37,7 +37,7 @@ function handleClick(): void {
   <div
     :class="[
       'card bg-surface-elevated border cursor-pointer hover-lift',
-      isYou ? 'border-coral/50 ring-1 ring-coral/30' : 'border-white/5'
+      isYou ? 'border-coral/50 ring-1 ring-coral/30' : 'border-white/5',
     ]"
     @click="handleClick"
   >
@@ -45,12 +45,7 @@ function handleClick(): void {
       <div class="flex items-start gap-4">
         <!-- Profile Image -->
         <div class="shrink-0 relative">
-          <div
-            :class="[
-              'rounded-full overflow-hidden',
-              compact ? 'w-10 h-10' : 'w-12 h-12'
-            ]"
-          >
+          <div :class="['rounded-full overflow-hidden', compact ? 'w-10 h-10' : 'w-12 h-12']">
             <img
               v-if="profileImageUrl"
               :src="profileImageUrl"
@@ -61,7 +56,7 @@ function handleClick(): void {
               v-else
               :class="[
                 'w-full h-full flex items-center justify-center bg-coral/20 text-coral font-display font-bold',
-                compact ? 'text-sm' : 'text-lg'
+                compact ? 'text-sm' : 'text-lg',
               ]"
             >
               {{ participant.name?.charAt(0)?.toUpperCase() }}
@@ -73,12 +68,13 @@ function handleClick(): void {
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2">
             <h3 class="font-display font-bold text-cream truncate">{{ participant.name }}</h3>
-            <span v-if="isYou" class="px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-coral/20 text-coral rounded">You</span>
+            <span
+              v-if="isYou"
+              class="px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-coral/20 text-coral rounded"
+              >You</span
+            >
           </div>
-          <p
-            v-if="participant.tagline && !compact"
-            class="text-sm text-subtle truncate"
-          >
+          <p v-if="participant.tagline && !compact" class="text-sm text-subtle truncate">
             {{ participant.tagline }}
           </p>
           <p class="text-sm font-medium text-coral truncate">

@@ -43,7 +43,7 @@ function handleClick(): void {
   <div
     :class="[
       'card bg-surface-elevated border overflow-hidden cursor-pointer hover-lift',
-      isYou ? 'border-coral/50 ring-1 ring-coral/30' : 'border-white/5'
+      isYou ? 'border-coral/50 ring-1 ring-coral/30' : 'border-white/5',
     ]"
     @click="handleClick"
   >
@@ -87,8 +87,14 @@ function handleClick(): void {
           </div>
           <div class="min-w-0">
             <div class="flex items-center gap-2">
-              <h2 class="font-display text-xl font-bold text-cream truncate">{{ participant.name }}</h2>
-              <span v-if="isYou" class="px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-coral/20 text-coral rounded shrink-0">You</span>
+              <h2 class="font-display text-xl font-bold text-cream truncate">
+                {{ participant.name }}
+              </h2>
+              <span
+                v-if="isYou"
+                class="px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-coral/20 text-coral rounded shrink-0"
+                >You</span
+              >
             </div>
             <p v-if="participant.tagline" class="text-subtle truncate">
               {{ participant.tagline }}

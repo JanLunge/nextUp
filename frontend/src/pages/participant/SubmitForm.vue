@@ -127,7 +127,12 @@ onMounted(() => {
         <div class="flex items-center gap-4">
           <button class="btn btn-ghost btn-sm btn-square" @click="goBack">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
           </button>
           <div>
@@ -142,11 +147,19 @@ onMounted(() => {
     <main class="px-4 py-6">
       <div class="max-w-lg mx-auto space-y-6">
         <!-- Prefilled Notice -->
-        <div v-if="prefilled" class="p-4 bg-info/10 border border-info/30 rounded-xl animate-fade-up">
+        <div
+          v-if="prefilled"
+          class="p-4 bg-info/10 border border-info/30 rounded-xl animate-fade-up"
+        >
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
               <svg class="w-5 h-5 text-info" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
               <span class="text-sm text-info">Pre-filled from your profile</span>
             </div>
@@ -158,7 +171,10 @@ onMounted(() => {
         <section class="card bg-surface-elevated border border-white/5 animate-fade-up">
           <div class="p-5">
             <h2 class="font-display font-bold text-cream mb-4 flex items-center gap-2">
-              <span class="w-6 h-6 rounded-full bg-coral/20 flex items-center justify-center text-coral text-xs font-bold">1</span>
+              <span
+                class="w-6 h-6 rounded-full bg-coral/20 flex items-center justify-center text-coral text-xs font-bold"
+                >1</span
+              >
               About You
             </h2>
 
@@ -168,11 +184,7 @@ onMounted(() => {
                 <label class="block text-sm font-medium text-subtle uppercase tracking-wider mb-2">
                   Profile Picture
                 </label>
-                <MediaUpload
-                  v-model="profileImagePath"
-                  type="profile"
-                  label="Upload Photo"
-                />
+                <MediaUpload v-model="profileImagePath" type="profile" label="Upload Photo" />
               </div>
 
               <!-- Name -->
@@ -208,7 +220,10 @@ onMounted(() => {
         <section class="card bg-surface-elevated border border-white/5 animate-fade-up delay-150">
           <div class="p-5">
             <h2 class="font-display font-bold text-cream mb-4 flex items-center gap-2">
-              <span class="w-6 h-6 rounded-full bg-coral/20 flex items-center justify-center text-coral text-xs font-bold">2</span>
+              <span
+                class="w-6 h-6 rounded-full bg-coral/20 flex items-center justify-center text-coral text-xs font-bold"
+                >2</span
+              >
               Your Project
             </h2>
 
@@ -262,7 +277,9 @@ onMounted(() => {
                   label="Upload Image or Video"
                   @update:media-type="mediaType = $event"
                 />
-                <p class="text-xs text-subtle mt-2">Max 30s video, 10MB. This will be shown on the main display.</p>
+                <p class="text-xs text-subtle mt-2">
+                  Max 30s video, 10MB. This will be shown on the main display.
+                </p>
               </div>
             </div>
           </div>
@@ -272,7 +289,10 @@ onMounted(() => {
         <section class="card bg-surface-elevated border border-white/5 animate-fade-up delay-200">
           <div class="p-5">
             <h2 class="font-display font-bold text-cream mb-4 flex items-center gap-2">
-              <span class="w-6 h-6 rounded-full bg-coral/20 flex items-center justify-center text-coral text-xs font-bold">3</span>
+              <span
+                class="w-6 h-6 rounded-full bg-coral/20 flex items-center justify-center text-coral text-xs font-bold"
+                >3</span
+              >
               Your Ask
             </h2>
 
@@ -306,7 +326,12 @@ onMounted(() => {
           <span v-if="loading" class="loading loading-spinner"></span>
           <span v-else class="flex items-center gap-2">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 10V3L4 14h7v7l9-11h-7z"
+              />
             </svg>
             Join the Queue
           </span>

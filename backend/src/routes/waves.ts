@@ -1,6 +1,11 @@
 import { Router, type Request, type Response } from 'express';
 import { roomQueries, profileQueries, participantQueries, waveQueries } from '../db.js';
-import type { WaveWithParticipantInfo, WaveWithProfileInfo, RoomParams, ParticipantParams } from '../types/index.js';
+import type {
+  WaveWithParticipantInfo,
+  WaveWithProfileInfo,
+  RoomParams,
+  ParticipantParams,
+} from '../types/index.js';
 
 const router = Router();
 
@@ -51,7 +56,11 @@ router.post('/:roomId/waves', (req: Request<RoomParams>, res: Response) => {
 
     let isMutual = false;
     if (myParticipant) {
-      const reverseWave = waveQueries.getByRoomAndFromTo.get(room.id, targetParticipant.profile_id, myParticipant.id);
+      const reverseWave = waveQueries.getByRoomAndFromTo.get(
+        room.id,
+        targetParticipant.profile_id,
+        myParticipant.id
+      );
       isMutual = !!reverseWave;
     }
 
@@ -60,7 +69,7 @@ router.post('/:roomId/waves', (req: Request<RoomParams>, res: Response) => {
     if (wsManager && isCurrentlyPresenting) {
       wsManager.broadcastToRoles(room.id, ['presenter', 'timer', 'admin'], {
         type: 'wave_animation',
-        participant_id: to_participant_id
+        participant_id: to_participant_id,
       });
     }
 
@@ -71,8 +80,8 @@ router.post('/:roomId/waves', (req: Request<RoomParams>, res: Response) => {
         from: {
           id: profile.id,
           name: profile.name,
-          profile_image_path: profile.profile_image_path
-        }
+          profile_image_path: profile.profile_image_path,
+        },
       });
 
       // If mutual, notify both parties
@@ -85,8 +94,8 @@ router.post('/:roomId/waves', (req: Request<RoomParams>, res: Response) => {
             tagline: targetParticipant.tagline,
             profile_image_path: targetParticipant.profile_image_path,
             project_name: targetParticipant.project_name,
-            project_url: targetParticipant.project_url
-          }
+            project_url: targetParticipant.project_url,
+          },
         });
 
         wsManager.notifyParticipant(room.id, targetParticipant.profile_id, {
@@ -94,8 +103,8 @@ router.post('/:roomId/waves', (req: Request<RoomParams>, res: Response) => {
           with: {
             id: profile.id,
             name: profile.name,
-            profile_image_path: profile.profile_image_path
-          }
+            profile_image_path: profile.profile_image_path,
+          },
         });
       }
     }
@@ -103,7 +112,7 @@ router.post('/:roomId/waves', (req: Request<RoomParams>, res: Response) => {
     res.json({
       success: true,
       is_mutual: isMutual,
-      triggered_animation: isCurrentlyPresenting
+      triggered_animation: isCurrentlyPresenting,
     });
   } catch (error) {
     console.error('Error sending wave:', error);
@@ -150,7 +159,11 @@ router.get('/:roomId/waves', (req: Request<RoomParams>, res: Response) => {
 
       // Check if they waved back
       const reverseWave = myParticipant
-        ? waveQueries.getByRoomAndFromTo.get(room.id, targetParticipant.profile_id, myParticipant.id)
+        ? waveQueries.getByRoomAndFromTo.get(
+            room.id,
+            targetParticipant.profile_id,
+            myParticipant.id
+          )
         : null;
 
       const waveData = {
@@ -160,7 +173,7 @@ router.get('/:roomId/waves', (req: Request<RoomParams>, res: Response) => {
         tagline: wave.tagline,
         profile_image_path: wave.profile_image_path,
         project_name: wave.project_name,
-        project_url: wave.project_url
+        project_url: wave.project_url,
       };
 
       if (reverseWave) {
@@ -182,7 +195,7 @@ router.get('/:roomId/waves', (req: Request<RoomParams>, res: Response) => {
           profile_id: wave.from_profile_id,
           name: wave.name,
           tagline: wave.tagline,
-          profile_image_path: wave.profile_image_path
+          profile_image_path: wave.profile_image_path,
         });
       }
     }
@@ -190,7 +203,7 @@ router.get('/:roomId/waves', (req: Request<RoomParams>, res: Response) => {
     res.json({
       mutual,
       sent: sentOnly,
-      received: receivedOnly
+      received: receivedOnly,
     });
   } catch (error) {
     console.error('Error getting waves:', error);
@@ -199,30 +212,35 @@ router.get('/:roomId/waves', (req: Request<RoomParams>, res: Response) => {
 });
 
 // Get waves for a specific participant
-router.get('/:roomId/participants/:participantId/waves', (req: Request<ParticipantParams>, res: Response) => {
-  try {
-    const roomId = req.params.roomId;
-    const participantId = parseInt(req.params.participantId, 10);
-    const participant = participantQueries.getById.get(participantId);
-    if (!participant || participant.room_id !== roomId) {
-      return res.status(404).json({ error: 'Participant not found' });
+router.get(
+  '/:roomId/participants/:participantId/waves',
+  (req: Request<ParticipantParams>, res: Response) => {
+    try {
+      const roomId = req.params.roomId;
+      const participantId = parseInt(req.params.participantId, 10);
+      const participant = participantQueries.getById.get(participantId);
+      if (!participant || participant.room_id !== roomId) {
+        return res.status(404).json({ error: 'Participant not found' });
+      }
+
+      const waves = waveQueries.getWavesForParticipant.all(
+        participant.id
+      ) as (WaveWithProfileInfo & { profile_id: number })[];
+
+      res.json({
+        count: waves.length,
+        wavers: waves.map((w: WaveWithProfileInfo & { profile_id: number }) => ({
+          id: w.profile_id,
+          name: w.name,
+          profile_image_path: w.profile_image_path,
+        })),
+      });
+    } catch (error) {
+      console.error('Error getting waves for participant:', error);
+      res.status(500).json({ error: 'Failed to get waves' });
     }
-
-    const waves = waveQueries.getWavesForParticipant.all(participant.id) as (WaveWithProfileInfo & { profile_id: number })[];
-
-    res.json({
-      count: waves.length,
-      wavers: waves.map((w: WaveWithProfileInfo & { profile_id: number }) => ({
-        id: w.profile_id,
-        name: w.name,
-        profile_image_path: w.profile_image_path
-      }))
-    });
-  } catch (error) {
-    console.error('Error getting waves for participant:', error);
-    res.status(500).json({ error: 'Failed to get waves' });
   }
-});
+);
 
 // Check if user has waved at participants
 router.get('/:roomId/waves/status', (req: Request<RoomParams>, res: Response) => {
@@ -246,7 +264,7 @@ router.get('/:roomId/waves/status', (req: Request<RoomParams>, res: Response) =>
     const wavedAt = sent.map((w: WaveWithParticipantInfo) => w.to_participant_id);
 
     res.json({
-      waved_at: wavedAt
+      waved_at: wavedAt,
     });
   } catch (error) {
     console.error('Error getting wave status:', error);
